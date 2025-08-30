@@ -59,6 +59,10 @@ export const useEndpoints = ({
     }
     const result: EModelEndpoint[] = [];
     for (let i = 0; i < endpoints.length; i++) {
+      // Pular completamente a opção "Plugins"
+      if (endpoints[i] === 'gptPlugins') {
+        continue;
+      }
       if (endpoints[i] === EModelEndpoint.agents && !hasAgentAccess) {
         continue;
       }
@@ -66,6 +70,13 @@ export const useEndpoints = ({
         continue;
       }
       result.push(endpoints[i]);
+    }
+
+    // Garantir que "agents" seja sempre o primeiro
+    const agentsIndex = result.indexOf(EModelEndpoint.agents);
+    if (agentsIndex > 0) {
+      const agentsEndpoint = result.splice(agentsIndex, 1)[0];
+      result.unshift(agentsEndpoint);
     }
 
     return result;
@@ -91,10 +102,15 @@ export const useEndpoints = ({
           ep !== EModelEndpoint.agents &&
           (modelsQuery.data?.[ep]?.length ?? 0) > 0);
 
+      // Verificar se há um nome personalizado no startupConfig
+      const customName = startupConfig?.endpoints?.[ep]?.displayName ||
+                        startupConfig?.endpoints?.[ep]?.name ||
+                        startupConfig?.endpoints?.[ep]?.label;
+
       // Base result object with formatted default icon
       const result: Endpoint = {
         value: ep,
-        label: alternateName[ep] || ep,
+        label: customName || alternateName[ep] || ep,
         hasModels,
         icon: Icon
           ? React.createElement(Icon, {

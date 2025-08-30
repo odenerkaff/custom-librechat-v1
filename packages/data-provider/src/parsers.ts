@@ -247,7 +247,7 @@ export const getResponseSender = (endpointOption: t.TEndpointOption): string => 
       const gptVersion = extractGPTVersion(model);
       return gptVersion || 'GPT';
     }
-    return (alternateName[endpoint] as string | undefined) ?? 'ChatGPT';
+    return (alternateName as any)[endpoint] ?? 'ChatGPT';
   }
 
   if (endpoint === EModelEndpoint.anthropic) {

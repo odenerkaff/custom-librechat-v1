@@ -77,9 +77,24 @@ export function getEndpointField<K extends keyof t.TConfig>(
 
 export function mapEndpoints(endpointsConfig: t.TEndpointsConfig) {
   const filter = getEndpointsFilter(endpointsConfig);
-  return getAvailableEndpoints(filter, endpointsConfig).sort(
+  const availableEndpoints = getAvailableEndpoints(filter, endpointsConfig);
+
+  // Filtrar e remover completamente a opção "Plugins"
+  const filteredEndpoints = availableEndpoints.filter(endpoint => endpoint !== 'gptPlugins');
+
+  // Forçar "agents" sempre como primeira opção
+  const sortedEndpoints = filteredEndpoints.sort(
     (a, b) => (endpointsConfig?.[a]?.order ?? 0) - (endpointsConfig?.[b]?.order ?? 0),
   );
+
+  // Garantir que "agents" seja sempre o primeiro
+  const agentsIndex = sortedEndpoints.indexOf(EModelEndpoint.agents);
+  if (agentsIndex > 0) {
+    const agentsEndpoint = sortedEndpoints.splice(agentsIndex, 1)[0];
+    sortedEndpoints.unshift(agentsEndpoint);
+  }
+
+  return sortedEndpoints;
 }
 
 const firstLocalConvoKey = LocalStorageKeys.LAST_CONVO_SETUP + '_0';

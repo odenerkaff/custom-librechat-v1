@@ -34,14 +34,13 @@ export default function Footer({ className }: { className?: string }) {
     </a>
   );
 
+  // Forçar o uso do customFooter se estiver disponível
+  const customFooter = config?.interface?.customFooter || config?.customFooter;
   const mainContentParts = (
-    typeof config?.customFooter === 'string'
-      ? config.customFooter
-      : '[LibreChat ' +
-        Constants.VERSION +
-        '](https://librechat.ai) - ' +
-        localize('com_ui_latest_footer')
-  ).split('|');
+  typeof customFooter === 'string' && customFooter.trim() !== ''
+    ? customFooter
+    : 'Conectô© - Todos os direitos reservados.'
+).split('|');
 
   useEffect(() => {
     if (config?.analyticsGtmId != null && typeof window.google_tag_manager === 'undefined') {
