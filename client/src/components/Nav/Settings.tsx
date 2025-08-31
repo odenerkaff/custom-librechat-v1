@@ -21,6 +21,7 @@ import {
   Data,
   Balance,
   Account,
+  Admin,
 } from './SettingsTabs';
 import usePersonalizationAccess from '~/hooks/usePersonalizationAccess';
 import { useLocalize, TranslationKeys } from '~/hooks';
@@ -35,17 +36,18 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
   const tabRefs = useRef({});
   const { hasAnyPersonalizationFeature, hasMemoryOptOut } = usePersonalizationAccess();
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    const tabs: SettingsTabValues[] = [
-      SettingsTabValues.GENERAL,
-      SettingsTabValues.CHAT,
-      SettingsTabValues.COMMANDS,
-      SettingsTabValues.SPEECH,
-      ...(hasAnyPersonalizationFeature ? [SettingsTabValues.PERSONALIZATION] : []),
-      SettingsTabValues.DATA,
-      ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
-      SettingsTabValues.ACCOUNT,
-    ];
+const handleKeyDown = (event: React.KeyboardEvent) => {
+  const tabs: SettingsTabValues[] = [
+    SettingsTabValues.GENERAL,
+    SettingsTabValues.CHAT,
+    SettingsTabValues.COMMANDS,
+    SettingsTabValues.SPEECH,
+    ...(hasAnyPersonalizationFeature ? [SettingsTabValues.PERSONALIZATION] : []),
+    SettingsTabValues.DATA,
+    ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
+    SettingsTabValues.ACCOUNT,
+    'admin' as any, // Temporarily add admin tab
+  ];
     const currentIndex = tabs.indexOf(activeTab);
 
     switch (event.key) {
@@ -120,6 +122,11 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
       value: SettingsTabValues.ACCOUNT,
       icon: <UserIcon />,
       label: 'com_nav_setting_account',
+    },
+    {
+      value: 'admin' as any,
+      icon: null, // No icon for admin
+      label: 'Admin' as TranslationKeys,
     },
   ];
 
@@ -210,11 +217,16 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                           isSmallScreen
                             ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary radix-state-active:bg-surface-hover radix-state-active:text-text-primary'
                             : 'bg-transparent text-text-secondary radix-state-active:bg-surface-tertiary radix-state-active:text-text-primary',
+                          // Special styling for admin tab without icon - keep black text
+                          value === 'admin' ? 'font-semibold' : ''
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}
                       >
                         {icon}
+                        {value === 'admin' && !isSmallScreen ? (
+                          <span className="text-gray-700">🛡️ </span>
+                        ) : null}
                         {localize(label)}
                       </Tabs.Trigger>
                     ))}
@@ -250,6 +262,9 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                     )}
                     <Tabs.Content value={SettingsTabValues.ACCOUNT}>
                       <Account />
+                    </Tabs.Content>
+                    <Tabs.Content value="admin">
+                      <Admin onClose={() => onOpenChange(false)} />
                     </Tabs.Content>
                   </div>
                 </Tabs.Root>

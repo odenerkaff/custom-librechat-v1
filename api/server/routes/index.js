@@ -1,4 +1,5 @@
 const accessPermissions = require('./accessPermissions');
+const admin = require('./admin');
 const assistants = require('./assistants');
 const categories = require('./categories');
 const tokenizer = require('./tokenizer');
@@ -31,6 +32,7 @@ const mcp = require('./mcp');
 module.exports = {
   mcp,
   edit,
+  admin,
   auth,
   keys,
   user,
