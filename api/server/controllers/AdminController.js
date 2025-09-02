@@ -1,56 +1,100 @@
 console.log('[ADMIN API] AdminController loaded successfully');
 
 const mongoose = require('mongoose');
-const {
-  User,
-  Balance,
-  updateUser,
-  deleteUserById,
-} = require('~/models');
+
+// Import models using the createModels function from @librechat/data-schemas
+let models;
+try {
+  const { createModels } = require('@librechat/data-schemas');
+  models = createModels(mongoose);
+  console.log('[ADMIN API] Models loaded from @librechat/data-schemas');
+} catch (error) {
+  console.error('[ADMIN API] CRITICAL ERROR: Cannot create models!');
+  console.error('[ADMIN API] Error:', error.message);
+  throw new Error('Failed to create models');
+}
+
+// Extract individual models
+const { User, Balance } = models;
+
+// Check if User is properly imported
+if (!User || typeof User.find !== 'function') {
+  console.error('[ADMIN API] USER MODEL INVALID - User.find is not a function');
+  console.error('[ADMIN API] User object:', User);
+  throw new Error('User model validation failed');
+} else {
+  console.log('[ADMIN API] User model validated successfully');
+}
+
+const { updateUser, deleteUserById } = require('~/models');
 const { validatePassword, hashPassword } = require('~/server/services/AuthService');
+
+// Import logger - fallback to console if winston fails
+let logger;
+try {
+  logger = require('~/config/winston') || { error: console.error, info: console.log };
+} catch (error) {
+  logger = { error: console.error, info: console.log };
+}
 
 console.log('[ADMIN API] All imports completed');
 
 // List all users for admin panel
 const listUsersController = async (req, res) => {
   try {
-    console.log('[ADMIN API] Starting listUsersController...');
-    console.log('[ADMIN API] User from request:', req.user ? req.user.email : 'No user');
-    console.log('[ADMIN API] User role:', req.user ? req.user.role : 'No role');
+    console.log('[ADMIN API] Starting request for user:', req.user?.email || 'unknown');
+    console.log('[ADMIN API] Auth header:', req.headers.authorization ? 'PRESENT' : 'MISSING');
+    console.log('[ADMIN API] User object:', !!req.user);
+    console.log('[ADMIN API] User ID from req.user:', req.user?._id);
 
-    // Debug more details
-    console.log('[ADMIN API] Request headers:', {
-      authorization: req.headers.authorization ? 'Present' : 'Missing',
-      'user-agent': req.headers['user-agent']
-    });
-    console.log('[ADMIN API] Request cookies:', req.cookies);
+    // Check if we're connected to MongoDB
+    console.log('[ADMIN API] Checking MongoDB connection...');
+    console.log('[ADMIN API] Mongoose ready state:', mongoose.connection.readyState);
 
-    // Simple query first to test
+    if (mongoose.connection.readyState !== 1) {
+      console.error('[ADMIN API] MongoDB is not connected!');
+      return res.status(500).json({
+        message: 'Database connection failed',
+        error: 'MongoDB not connected',
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Simple query for users
+    console.log('[ADMIN API] Executing MongoDB query...');
     const users = await User.find({}, '-password -totpSecret -backupCodes')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .limit(50);
 
-    console.log('[ADMIN API] Found users:', users.length);
+    console.log('[ADMIN API DEBUG] MongoDB query successful, found:', users.length);
+    console.log('[ADMIN API DEBUG] First user sample:', users[0]?.email || 'No users found');
 
-    const usersWithBalance = users.map(user => ({
+    let usersWithBalance = users.map(user => ({
       id: user._id,
       name: user.name || 'Sem nome',
       email: user.email || 'Sem email',
       role: user.role || 'USER',
       createdAt: user.createdAt,
       lastActivity: user.updatedAt,
-      balance: 0, // Will implement balance later
+      balance: 0,
       provider: user.provider || 'local',
       avatar: user.avatar,
       emailVerified: user.emailVerified || false
     }));
 
-    console.log('Returning users:', usersWithBalance.length);
+    console.log('[ADMIN API] Returning', usersWithBalance.length, 'users');
+    console.log('[ADMIN API] User names:', usersWithBalance.map(u => u.name).join(', '));
+
     res.status(200).send(usersWithBalance);
   } catch (error) {
-    console.error('[listUsersController] Error:', error);
+    console.error('[ADMIN API] Error captured in catch block:', error);
+    console.error('[ADMIN API] Error message:', error.message);
+    console.error('[ADMIN API] Error name:', error.name);
+    console.error('[ADMIN API] Error stack:', error.stack);
     res.status(500).json({
       message: 'Failed to retrieve users',
-      error: error.message
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 };

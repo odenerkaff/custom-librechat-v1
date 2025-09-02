@@ -21,7 +21,7 @@ interface AdminPanelProps {
 }
 
 const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => {
-  const { user } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [editingUser, setEditingUser] = useState<UserWithActivity | null>(null);
@@ -46,26 +46,67 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
   const { data: users, isLoading, error } = useQuery<UserWithActivity[], Error>({
     queryKey: ['adminUsers'],
     queryFn: async (): Promise<UserWithActivity[]> => {
-      const response = await fetch('/api/admin/users');
+      console.log('[AdminPanel] Using token from AuthContext:', token ? 'Token presente' : 'Sem token');
+      console.log('[AdminPanel] User authenticated:', isAuthenticated);
+      console.log('[AdminPanel] User role:', user?.role);
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+        console.log('[AdminPanel] Using Authorization header with AuthContext token');
+      } else {
+        console.log('[AdminPanel] WARNING: No token found in AuthContext');
+      }
+
+      const response = await fetch('/api/admin/users', {
+        headers,
+        credentials: 'include',
+      });
+
+      console.log('[AdminPanel] Response status:', response.status);
+
       if (response.status === 403) {
         throw new Error('Acesso negado - Você não tem permissão');
       }
+      if (response.status === 401) {
+        throw new Error('Não autenticado - faça login novamente');
+      }
       if (!response.ok) {
-        throw new Error('Erro ao carregar usuários');
+        throw new Error(`Erro ao carregar usuários (${response.status})`);
       }
       return response.json();
     },
+    enabled: !!(isAuthenticated && token && user?.role === 'ADMIN'),
   });
 
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
+      console.log('[DeleteUser] Using token from AuthContext:', token ? 'Token presente' : 'Sem token');
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        credentials: 'include',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`/api/admin/users/${userId}`, {
         method: 'DELETE',
+        headers,
       });
+
       if (!response.ok) {
         if (response.status === 403) {
           throw new Error('Acesso negado - Você não tem permissão para excluir este usuário');
+        }
+        if (response.status === 401) {
+          throw new Error('Não autenticado - faça login novamente');
         }
         throw new Error('Erro ao excluir usuário');
       }
@@ -95,13 +136,21 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
 
   const handleSubmitModal = async (userData: any) => {
     console.log('Modal submitted:', userData);
+    console.log('[CreateUser] Using token from AuthContext:', token ? 'Token presente' : 'Sem token');
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     try {
       const response = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
+        credentials: 'include',
         body: JSON.stringify(userData),
       });
 
@@ -109,6 +158,12 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
       console.log('API Response:', result);
 
       if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error('Acesso negado - Você não tem permissão');
+        }
+        if (response.status === 401) {
+          throw new Error('Não autenticado - faça login novamente');
+        }
         throw new Error(result.message || 'Erro ao criar usuário');
       }
 
@@ -144,13 +199,13 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
     };
 
     // Calculate stats
-    const totalUsers = users?.length || 0;
-    const activeAdmins = users?.filter(u => u.role === 'ADMIN').length || 0;
-    const activeUsers = users?.filter(u => {
+    const totalUsers = (users || []).length;
+    const activeAdmins = (users || []).filter(u => u.role === 'ADMIN').length;
+    const activeUsers = (users || []).filter(u => {
       const lastActivity = new Date(u.lastActivity || u.createdAt);
       const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       return lastActivity > oneMonthAgo;
-    }).length || 0;
+    }).length;
 
   return (
     <div className="flex-1 p-6 max-w-full">
@@ -257,7 +312,7 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
                 </tr>
               )}
 
-              {users && users.length > 0 && users?.map((userItem) => (
+              {users && (users as UserWithActivity[]).length > 0 && users?.map((userItem) => (
                 <tr key={userItem.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 max-w-xs truncate">
                     <div className="flex items-center">
