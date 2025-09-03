@@ -1,5 +1,5 @@
 const express = require('express');
-const { checkAdmin } = require('~/server/middleware');
+const { checkAdmin, requireJwtAuth } = require('~/server/middleware');
 const {
   listUsersController,
   createUserController,
@@ -10,8 +10,9 @@ const {
 
 const router = express.Router();
 
-// All admin routes require admin privileges
-router.use(checkAdmin);
+// All admin routes require authentication and admin privileges
+router.use(requireJwtAuth);  // First: authenticate the user
+router.use(checkAdmin);      // Then: verify admin role
 
 // List all users
 router.get('/users', listUsersController);

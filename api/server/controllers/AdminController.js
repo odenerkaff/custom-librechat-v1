@@ -69,21 +69,49 @@ const listUsersController = async (req, res) => {
     console.log('[ADMIN API DEBUG] MongoDB query successful, found:', users.length);
     console.log('[ADMIN API DEBUG] First user sample:', users[0]?.email || 'No users found');
 
-    let usersWithBalance = users.map(user => ({
-      id: user._id,
-      name: user.name || 'Sem nome',
-      email: user.email || 'Sem email',
-      role: user.role || 'USER',
-      createdAt: user.createdAt,
-      lastActivity: user.updatedAt,
-      balance: 0,
-      provider: user.provider || 'local',
-      avatar: user.avatar,
-      emailVerified: user.emailVerified || false
-    }));
+    // Load balance for each user
+    console.log('[ADMIN API] Loading balance for each user...');
+    const usersWithBalance = await Promise.all(
+      users.map(async (user) => {
+        try {
+          // Get balance directly from Balance model
+          const balanceRecord = await Balance.findOne({ user: user._id }).lean();
+          const balance = balanceRecord?.tokenCredits || 0;
 
-    console.log('[ADMIN API] Returning', usersWithBalance.length, 'users');
-    console.log('[ADMIN API] User names:', usersWithBalance.map(u => u.name).join(', '));
+          console.log(`[ADMIN API] User ${user.name} (${user.email}) balance: ${balance}`);
+
+          return {
+            id: user._id,
+            name: user.name || 'Sem nome',
+            email: user.email || 'Sem email',
+            role: user.role || 'USER',
+            createdAt: user.createdAt,
+            lastActivity: user.lastActive || user.updatedAt,
+            balance: balance,
+            provider: user.provider || 'local',
+            avatar: user.avatar,
+            emailVerified: user.emailVerified || false
+          };
+        } catch (error) {
+          console.error(`[ADMIN API] Error loading balance for user ${user.name}:`, error);
+          return {
+            id: user._id,
+            name: user.name || 'Sem nome',
+            email: user.email || 'Sem email',
+            role: user.role || 'USER',
+            createdAt: user.createdAt,
+            lastActivity: user.updatedAt,
+            balance: 0, // Fallback to 0 if balance loading fails
+            provider: user.provider || 'local',
+            avatar: user.avatar,
+            emailVerified: user.emailVerified || false
+          };
+        }
+      })
+    );
+
+    console.log('[ADMIN API] Returning', usersWithBalance.length, 'users with balance data');
+    console.log('[ADMIN API] Balance summary:', usersWithBalance.map(u => `${u.name}: ${u.balance}`).join(', '));
 
     res.status(200).send(usersWithBalance);
   } catch (error) {
@@ -131,11 +159,38 @@ const createUserController = async (req, res) => {
       const savedUser = await newUser.save();
       console.log('User saved successfully:', savedUser._id);
 
+      // Create initial balance for new user
+      try {
+        console.log('[ADMIN API] Creating initial balance for new user...');
+
+        // Use default balance configuration from librechat.yaml
+        const startBalance = 20000; // You can make this configurable later
+
+        const newBalance = new Balance({
+          user: savedUser._id,
+          tokenCredits: startBalance,
+          context: 'initial-admin-creation',
+          autoRefillEnabled: true,
+          refillIntervalValue: 1,
+          refillIntervalUnit: 'days',
+          refillAmount: 10000
+        });
+
+        await newBalance.save();
+        console.log('[ADMIN API] Initial balance created:', startBalance, 'credits for user', savedUser.name);
+
+      } catch (balanceError) {
+        console.error('[ADMIN API] Error creating initial balance:', balanceError);
+        // Continue with user creation even if balance creation fails
+        console.log('[ADMIN API] User created successfully even with balance error');
+      }
+
       res.status(201).json({
         id: savedUser._id,
         name: savedUser.name,
         email: savedUser.email,
         role: savedUser.role,
+        balance: startBalance, // Return the initial balance
         createdAt: savedUser.createdAt
       });
 

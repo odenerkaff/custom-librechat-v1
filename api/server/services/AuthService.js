@@ -501,6 +501,27 @@ const resendVerificationEmail = async (req) => {
   }
 };
 
+/**
+ * Hash password
+ * @param {String} password
+ * @returns {Promise<String>} hashed password
+ */
+const hashPassword = async (password) => {
+  const saltRounds = 10;
+  return bcrypt.hash(password, saltRounds);
+};
+
+/**
+ * Validate password strength
+ * @param {String} password
+ * @returns {Boolean} is valid
+ */
+const validatePassword = (password) => {
+  // Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+  return passwordRegex.test(password);
+};
+
 module.exports = {
   logoutUser,
   verifyEmail,
@@ -510,4 +531,6 @@ module.exports = {
   setOpenIDAuthTokens,
   requestPasswordReset,
   resendVerificationEmail,
+  hashPassword,
+  validatePassword,
 };

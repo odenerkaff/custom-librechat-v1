@@ -1,0 +1,6 @@
+{
+  "name": "Teste Criacao User",
+  "email": "teste@kaffco.com.br",
+  "password": "admin123456",
+  "role": "USER"
+}

@@ -17,7 +17,7 @@ interface User {
 }
 
 export default function Admin({ onClose }) {
-  const { user } = useAuthContext();
+  const { user, isAuthenticated, token: authToken } = useAuthContext();
   const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -32,12 +32,30 @@ export default function Admin({ onClose }) {
     const fetchAdminStats = async () => {
       if (!user || user.role !== 'ADMIN') return;
 
+      console.log('[AdminSettings] Using token from AuthContext:', authToken ? 'Token presente' : 'Sem token');
+      console.log('[AdminSettings] User authenticated:', isAuthenticated);
+
       try {
         setStats(prev => ({ ...prev, loading: true, error: null }));
-        const response = await fetch('/api/admin/users');
+
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+        }
+
+        const response = await fetch('/api/admin/users', {
+          headers,
+          credentials: 'include',
+        });
 
         if (response.status === 403) {
           throw new Error('Acesso negado - Você não tem permissão');
+        }
+        if (response.status === 401) {
+          throw new Error('Não autenticado - faça login novamente');
         }
         if (!response.ok) {
           throw new Error('Erro ao carregar estatísticas');
@@ -51,6 +69,8 @@ export default function Admin({ onClose }) {
           const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
           return lastActivity > oneMonthAgo;
         }).length;
+
+        console.log('[AdminSettings] Dados carregados:', { totalUsers, totalAdmins, activeUsers });
 
         setStats({
           totalUsers,
@@ -70,7 +90,7 @@ export default function Admin({ onClose }) {
     };
 
     fetchAdminStats();
-  }, [user]);
+  }, [user, isAuthenticated, authToken]);
 
   // Check if user is admin
   if (user?.role !== 'ADMIN') {
@@ -87,6 +107,16 @@ export default function Admin({ onClose }) {
   const handleGoToAdminPanel = () => {
     if (onClose) onClose();
     navigate('/admin');
+  };
+
+  const handleGoToDashboard = () => {
+    if (onClose) onClose();
+    window.location.href = '/admin#dashboard';
+  };
+
+  const handleGoToLogs = () => {
+    if (onClose) onClose();
+    window.location.href = '/admin#logs';
   };
 
   return (
@@ -161,14 +191,20 @@ export default function Admin({ onClose }) {
             <div className="p-4 border rounded-lg">
               <h3 className="font-semibold mb-2">Logs do Sistema</h3>
               <p className="text-sm text-gray-600">Visualize logs de atividades e erros</p>
-              <button className="mt-2 text-blue-600 hover:underline text-sm">
+              <button
+                onClick={handleGoToLogs}
+                className="mt-2 text-blue-600 hover:underline text-sm"
+              >
                 Verificar Logs
               </button>
             </div>
             <div className="p-4 border rounded-lg">
               <h3 className="font-semibold mb-2">Estatísticas</h3>
               <p className="text-sm text-gray-600">Analise estatísticas de uso do sistema</p>
-              <button className="mt-2 text-blue-600 hover:underline text-sm">
+              <button
+                onClick={handleGoToDashboard}
+                className="mt-2 text-blue-600 hover:underline text-sm"
+              >
                 Ver Estatísticas
               </button>
             </div>

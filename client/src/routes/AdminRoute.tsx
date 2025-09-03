@@ -7,6 +7,7 @@ import { useFileMap } from '~/hooks';
 export default function AdminRoute() {
   const { user } = useAuthContext();
   const fileMap = useFileMap({ isAuthenticated: !!user });
+  const [activeTab, setActiveTab] = React.useState('dashboard');
 
   // Check if user is admin
   if (user?.role !== 'ADMIN') {
@@ -83,7 +84,33 @@ export default function AdminRoute() {
   );
 
   const AdminLayout = () => {
-    const [activeTab, setActiveTab] = React.useState('dashboard');
+    // Handle URL hash navigation
+    React.useEffect(() => {
+      const handleHashChange = () => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash && ['dashboard', 'users', 'logs'].includes(hash)) {
+          setActiveTab(hash);
+        }
+      };
+
+      // Check initial hash
+      const initialHash = window.location.hash.replace('#', '');
+      if (initialHash && ['dashboard', 'users', 'logs'].includes(initialHash)) {
+        setActiveTab(initialHash);
+      }
+
+      // Listen for hash changes
+      window.addEventListener('hashchange', handleHashChange);
+
+      return () => {
+        window.removeEventListener('hashchange', handleHashChange);
+      };
+    }, []);
+
+    const handleTabChange = (tab: string) => {
+      setActiveTab(tab);
+      window.location.hash = tab;
+    };
 
     const renderAdminContent = () => {
       switch (activeTab) {
@@ -109,7 +136,7 @@ export default function AdminRoute() {
       <SetConvoProvider>
         <FileMapContext.Provider value={fileMap}>
           <div className="flex h-screen bg-gray-50">
-            <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+            <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} />
             <div className="flex-1 flex flex-col overflow-hidden">
               {renderAdminContent()}
             </div>

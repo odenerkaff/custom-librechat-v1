@@ -27,7 +27,7 @@ const routes = require('./routes');
 const { PORT, HOST, ALLOW_SOCIAL_LOGIN, DISABLE_COMPRESSION, TRUST_PROXY } = process.env ?? {};
 
 // Allow PORT=0 to be used for automatic free port assignment
-const port = isNaN(Number(PORT)) ? 3080 : Number(PORT);
+const port = isNaN(Number(PORT)) ? 3081 : Number(PORT);
 const host = HOST || 'localhost';
 const trusted_proxy = Number(TRUST_PROXY) || 1; /* trust first proxy by default */
 
@@ -43,9 +43,6 @@ const startServer = async () => {
   indexSync().catch((err) => {
     logger.error('[indexSync] Background sync failed:', err);
   });
-
-  app.disable('x-powered-by');
-  app.set('trust proxy', trusted_proxy);
 
   await seedDatabase();
 
@@ -106,6 +103,7 @@ const startServer = async () => {
   }
 
   app.use('/oauth', routes.oauth);
+
   /* API Endpoints */
   app.use('/api/admin', routes.admin);
   app.use('/api/auth', routes.auth);
