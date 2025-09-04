@@ -22,12 +22,12 @@ function Commands() {
   return (
     <div className="space-y-4 p-1">
       <div className="flex items-center gap-2">
-        <h3 className="text-lg font-medium text-text-primary">
+        <h3 className="text-2xl font-medium text-text-primary">
           {localize('com_nav_chat_commands')}
         </h3>
         <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_chat_commands_info')} />
       </div>
-      <div className="flex flex-col gap-3 text-sm text-text-primary">
+      <div className="flex flex-col gap-3 text-base text-text-primary">
         <div className="pb-3">
           <AtCommandSwitch />
         </div>

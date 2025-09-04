@@ -210,14 +210,17 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
   return (
     <div className="flex-1 p-6 max-w-full">
       {showStats && (
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Dashboard Administrativo</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Painel de Administração</h1>
+          <p className="text-gray-600 mt-2">
+            Gerencie usuários, configurações do sistema e monitore atividades
+          </p>
         </div>
       )}
 
       {showTable && (
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Gerenciamento de Usuários</h1>
+          <h1 className="text-2xl font-bold text-base text-center flex-1">Gerenciamento de Usuários</h1>
           <button
             onClick={() => handleOpenModal()}
             className="px-4 py-2 bg-green-600 text-white rounded-2xl hover:bg-green-700 flex items-center gap-2 transition-colors"

@@ -38,7 +38,7 @@ export const DeleteCache = ({ disabled = false }: { disabled?: boolean }) => {
 
   return (
     <div className="flex items-center justify-between">
-      <Label className="font-light">{localize('com_nav_delete_cache_storage')}</Label>
+      <Label className="font-light text-base">{localize('com_nav_delete_cache_storage')}</Label>
       <OGDialog open={open} onOpenChange={setOpen}>
         <OGDialogTrigger asChild>
           <Button

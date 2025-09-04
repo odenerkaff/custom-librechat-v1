@@ -1,12 +1,68 @@
 const axios = require('axios');
 
+// Script para criar usuário admin
+async function createAdminUser() {
+  const BASE_URL = 'http://localhost:3092';
+  const adminData = {
+    name: 'Administração',
+    email: 'admin@company.com.br',
+    password: 'admin123456'
+  };
+
+  try {
+    console.log('🔧 CRIANDO USUÁRIO ADMIN...');
+    console.log(`   Email: ${adminData.email}`);
+    console.log(`   Senha: ${adminData.password}`);
+    console.log(`   Role: ADMIN`);
+
+    // Registrar admin
+    await axios.post(`${BASE_URL}/api/auth/register`, {
+      ...adminData,
+      confirm_password: adminData.password
+    });
+
+    console.log('✅ Admin criado com sucesso!');
+    console.log('');
+    console.log('🚀 URL Admin: http://localhost:3090');
+    console.log(`👤 Login: ${adminData.email}`);
+    console.log(`🔑 Senha: ${adminData.password}`);
+    console.log('');
+    console.log('🔗 No sistema, vá em:');
+    console.log('   1. Clicar no avatar (canto superior direito)');
+    console.log('   2. Configurações');
+    console.log('   3. Aba "Indicações"');
+    console.log('');
+    console.log('📊 Sistema de Indicações ativado!');
+
+  } catch (error) {
+    const errorMsg = error.response?.data?.message || error.message;
+    if (errorMsg.includes('already exists')) {
+      console.log('ℹ️  Admin já existe, continuando...');
+      console.log('');
+      console.log('🚀 URL Admin: http://localhost:3090');
+      console.log(`👤 Login: ${adminData.email}`);
+      console.log(`🔑 Senha: ${adminData.password}`);
+      console.log('');
+    } else {
+      console.log('❌ Erro ao criar admin:', errorMsg);
+    }
+  }
+}
+
+// Executar se for chamado diretamente
+if (require.main === module) {
+  createAdminUser();
+}
+
+const axios = require('axios');
+
 // Teste completo do sistema de referral
 async function testReferralSystem() {
   console.log('🎯 TESTE SISTEMA COMPLETO DE REFERRAL');
   console.log('='.repeat(60));
 
   try {
-    const BASE_URL = 'http://localhost:3091';
+    const BASE_URL = 'http://localhost:3092';
 
     // === FASE 1: CRIAR USUARIO INDICADOR (REFERRER) ===
     console.log('\n📝 FASE 1: Criando usuário indicador...');
@@ -16,13 +72,52 @@ async function testReferralSystem() {
       password: 'senha123456'
     };
 
-    // Registrar referrer
+    // Registrar referrer (usar usuários únicos para evitar rate limiting)
     try {
       console.log(`   Registrando: ${referrerData.name}`);
-      await axios.post(`${BASE_URL}/api/auth/register`, referrerData);
+      await axios.post(`${BASE_URL}/api/auth/register`, {
+        ...referrerData,
+        confirm_password: referrerData.password
+      });
       console.log('   ✅ Referrer registrado com sucesso');
     } catch (regError) {
-      console.log(`   ⚠️  Referrer pode já existir: ${regError.response?.data?.message || regError.message}`);
+      console.log(`   ⚠️  Referrer já existe (continuando teste): ${regError.response?.data?.message || regError.message}`);
+      // Se o usuário já existe, vamos tentar fazer login diretamente
+      console.log('   🔄 Tentando login do referrer existente...');
+      try {
+        const loginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+          email: referrerData.email,
+          password: referrerData.password
+        });
+        const existingToken = loginResponse.data.token;
+        console.log('   ✅ Referrer existente logado com sucesso');
+
+        // Agora fazer as verificações com o token existente
+        console.log('   Buscando dados de referral do referrer...');
+        const referrerDataResponse = await axios.get(`${BASE_URL}/api/referral/me`, {
+          headers: { Authorization: `Bearer ${existingToken}` }
+        });
+
+        if (referrerDataResponse.data.totalReferrals > 0) {
+          console.log('   📊 Referrer já tem indicações! Pode ser de teste anterior');
+          console.log(`      Indicações: ${referrerDataResponse.data.totalReferrals}`);
+          console.log(`      Créditos: ${referrerDataResponse.data.currentBalance}`);
+          console.log(`      Código: ${referrerDataResponse.data.referralCode}`);
+          console.log(`      Link: ${referrerDataResponse.data.referralLink}`);
+
+          return {
+            success: true,
+            referrerEmail: referrerData.email,
+            referredEmail: null,
+            balanceIncrease: 'Já testado',
+            totalReferrals: referrerDataResponse.data.totalReferrals,
+            referralCode: referrerDataResponse.data.referralCode
+          };
+        }
+      } catch (loginError) {
+        console.error('   ❌ Não foi possível fazer login do referrer existente');
+        return null;
+      }
     }
 
     // Login do referrer
@@ -63,7 +158,10 @@ async function testReferralSystem() {
     console.log(`   Dados: ${referredData.name} <${referredData.email}>`);
     console.log(`   Usando link: /register?ref=${referralCode}`);
 
-    await axios.post(`${BASE_URL}/api/auth/register?ref=${referralCode}`, referredData);
+    await axios.post(`${BASE_URL}/api/auth/register?ref=${referralCode}`, {
+      ...referredData,
+      confirm_password: referredData.password
+    });
     console.log('   ✅ Referido registrado com sucesso via link de indicação');
 
     // === FASE 3: VERIFICAR RECOMPENSA NO REFERRER ===

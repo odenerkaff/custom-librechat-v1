@@ -31,7 +31,7 @@ export const ClearChats = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <Label className="font-light">{localize('com_nav_clear_all_chats')}</Label>
+      <Label className="font-light text-base">{localize('com_nav_clear_all_chats')}</Label>
       <OGDialog open={open} onOpenChange={setOpen}>
         <OGDialogTrigger asChild>
           <Button

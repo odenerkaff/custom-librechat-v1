@@ -76,7 +76,7 @@ function ImportConversations() {
 
   return (
     <div className="flex items-center justify-between">
-      <div>{localize('com_ui_import_conversation_info')}</div>
+      <span className="text-base">{localize('com_ui_import_conversation_info')}</span>
       <button
         onClick={handleImportClick}
         onKeyDown={handleKeyDown}

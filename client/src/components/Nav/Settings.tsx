@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
 import { SettingsTabValues } from 'librechat-data-provider';
-import { MessageSquare, Command, DollarSign } from 'lucide-react';
+import { MessageSquare, Command, DollarSign, Users } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import {
   GearIcon,
@@ -22,6 +22,7 @@ import {
   Balance,
   Account,
   Admin,
+  Referral,
 } from './SettingsTabs';
 import usePersonalizationAccess from '~/hooks/usePersonalizationAccess';
 import { useLocalize, TranslationKeys } from '~/hooks';
@@ -46,6 +47,7 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
     SettingsTabValues.DATA,
     ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
     SettingsTabValues.ACCOUNT,
+    'referral' as any,
     'admin' as any, // Temporarily add admin tab
   ];
     const currentIndex = tabs.indexOf(activeTab);
@@ -124,6 +126,11 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
       label: 'com_nav_setting_account',
     },
     {
+      value: 'referral' as any,
+      icon: <Users size={18} />,
+      label: 'Indicações' as TranslationKeys,
+    },
+    {
       value: 'admin' as any,
       icon: null, // No icon for admin
       label: 'Admin' as TranslationKeys,
@@ -159,7 +166,7 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             <DialogPanel
               className={cn(
-                'min-h-[600px] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:min-h-[373px] md:w-[680px]',
+                'min-h-[600px] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:min-h-[373px] md:w-[950px]',
               )}
             >
               <DialogTitle
@@ -192,7 +199,7 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
                   <span className="sr-only">{localize('com_ui_close')}</span>
                 </button>
               </DialogTitle>
-              <div className="max-h-[550px] overflow-auto px-6 md:max-h-[400px] md:min-h-[400px] md:w-[680px]">
+          <div className="max-h-[750px] overflow-auto px-6 md:max-h-[600px] md:min-h-[600px] md:w-[900px]">
                 <Tabs.Root
                   value={activeTab}
                   onValueChange={handleTabChange}
@@ -262,6 +269,9 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
                     )}
                     <Tabs.Content value={SettingsTabValues.ACCOUNT}>
                       <Account />
+                    </Tabs.Content>
+                    <Tabs.Content value="referral">
+                      <Referral />
                     </Tabs.Content>
                     <Tabs.Content value="admin">
                       <Admin onClose={() => onOpenChange(false)} />

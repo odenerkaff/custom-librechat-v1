@@ -33,7 +33,7 @@ const ReferralPanel = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 max-w-6xl mx-auto">
+      <div className="flex-1 p-4 max-w-7xl mx-auto min-h-[600px]">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando dados de indicação...</p>
@@ -68,7 +68,7 @@ const ReferralPanel = () => {
     <div className="flex-1 p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Programa de Indicação</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Programa de Indicação</h1>
         <p className="text-gray-600">
           Convide amigos e ganhe 500 créditos por cada pessoa que se cadastrar!
         </p>
@@ -77,85 +77,72 @@ const ReferralPanel = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm font-medium">Total de Indicações</p>
-              <p className="text-2xl font-bold">{totalReferrals}</p>
-            </div>
-            <div className="text-4xl opacity-20">
-              👥
-            </div>
+          <div className="text-center">
+            <p className="text-blue-100 text-sm font-medium">Total de Indicações</p>
+            <p className="text-3xl font-bold mt-2">{totalReferrals}</p>
           </div>
         </div>
 
         <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-green-100 text-sm font-medium">Créditos Ganados</p>
-              <p className="text-2xl font-bold">{totalReferrals * 500}</p>
-            </div>
-            <div className="text-4xl opacity-20">
-              💰
-            </div>
+          <div className="text-center">
+            <p className="text-green-100 text-sm font-medium">Créditos Ganhos</p>
+            <p className="text-3xl font-bold mt-2">{totalReferrals * 500}</p>
           </div>
         </div>
 
         <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-purple-100 text-sm font-medium">Sua Posição</p>
-              <p className="text-2xl font-bold">
-                {currentUserPosition >= 0 ? `#${currentUserPosition + 1}` : '-'}
-              </p>
-            </div>
-            <div className="text-4xl opacity-20">
-              🏆
-            </div>
+          <div className="text-center">
+            <p className="text-purple-100 text-sm font-medium">Sua Posição</p>
+            <p className="text-3xl font-bold mt-2">
+              {currentUserPosition >= 0 ? `#${currentUserPosition + 1}` : '-'}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Referral Link Section */}
       <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Seu Link de Indicação</h2>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              value={referralData?.referralLink || ''}
-              readOnly
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 font-mono text-sm"
-              placeholder="Carregando link de indicação..."
-            />
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopyLink}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center ${
-                copySuccess
-                  ? 'bg-green-600 hover:bg-green-700 text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
-              }`}
-              disabled={!referralData?.referralLink}
-            >
-              {copySuccess ? '✓ Copiado!' : '📋 Copiar Link'}
-            </button>
-            <button
-              onClick={handleShareLink}
-              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
-              disabled={!referralData?.referralLink}
-            >
-              🔗 Compartilhar
-            </button>
-          </div>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Seu Link de Indicação</h2>
+
+        {/* Link Display */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={referralData?.referralLink || ''}
+            readOnly
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 font-mono text-sm"
+            placeholder="Carregando link de indicação..."
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={handleCopyLink}
+            className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+              copySuccess
+                ? 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            }`}
+            disabled={!referralData?.referralLink}
+          >
+            {copySuccess ? '✓ Copiado!' : 'Copiar Link'}
+          </button>
+          <button
+            onClick={handleShareLink}
+            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            disabled={!referralData?.referralLink}
+          >
+            Compartilhar
+          </button>
         </div>
 
         <div className="mt-4 text-sm text-gray-600">
-          <p className="mb-2">
-            💡 <strong>Código de indicação:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{referralData?.referralCode}</code>
+          <p className="mb-2 text-center">
+            <strong>Código de indicação:</strong> <code className="bg-gray-100 px-2 py-1 rounded">{referralData?.referralCode}</code>
           </p>
-          <p>
-            🔔 <strong>Cada pessoa indicada dá:</strong> +500 créditos para você
+          <p className="text-center">
+            <strong>Cada pessoa indicada dá:</strong> +500 créditos para você
           </p>
         </div>
       </div>
@@ -163,10 +150,10 @@ const ReferralPanel = () => {
       {/* Navigation Tabs */}
       <div className="bg-white rounded-lg shadow-sm border mb-8">
         <div className="border-b">
-          <div className="flex">
+          <div className="flex justify-center">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium whitespace-nowrap transition-colors text-sm lg:text-base ${
                 activeTab === 'overview'
                   ? 'border-b-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
@@ -176,7 +163,7 @@ const ReferralPanel = () => {
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium whitespace-nowrap transition-colors text-sm lg:text-base ${
                 activeTab === 'history'
                   ? 'border-b-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
@@ -186,7 +173,7 @@ const ReferralPanel = () => {
             </button>
             <button
               onClick={() => setActiveTab('leaderboard')}
-              className={`px-6 py-3 font-medium transition-colors ${
+              className={`px-6 py-3 font-medium whitespace-nowrap transition-colors text-sm lg:text-base ${
                 activeTab === 'leaderboard'
                   ? 'border-b-2 border-blue-600 text-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
@@ -198,10 +185,10 @@ const ReferralPanel = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-6 min-h-[400px]">
           {activeTab === 'overview' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Como Funciona</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Como Funciona</h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <div className="flex items-center mb-4">
@@ -210,30 +197,30 @@ const ReferralPanel = () => {
                     </div>
                     <h3 className="text-lg font-medium">Compartilhe seu Link</h3>
                   </div>
-                  <p className="text-gray-600 mb-6 ml-11">
+                  <p className="text-gray-600 mb-6 ml-11 leading-relaxed">
                     Copie seu link único de indicação e compartilhe com amigos e conhecidos.
                   </p>
 
-                  <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-3">
-                      2
-                    </div>
-                    <h3 className="text-lg font-medium">Amigo se Cadastra</h3>
-                  </div>
-                  <p className="text-gray-600 mb-6 ml-11">
-                    Quando alguém usa seu link para se cadastrar, o sistema registra a indicação.
-                  </p>
-                </div>
-
-                <div>
                   <div className="flex items-center mb-4">
                     <div className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center font-bold mr-3">
                       3
                     </div>
                     <h3 className="text-lg font-medium">Ganhe Créditos</h3>
                   </div>
-                  <p className="text-gray-600 mb-6 ml-11">
-                    Receba automaticamente 500 créditos para usar em suas conversas!
+                  <p className="text-gray-600 mb-6 ml-11 leading-relaxed">
+                    Receba <span className="font-semibold">automaticamente</span> 500 créditos para usar em suas conversas!
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold mr-3">
+                      2
+                    </div>
+                    <h3 className="text-lg font-medium">Amigo se Cadastra</h3>
+                  </div>
+                  <p className="text-gray-600 mb-6 ml-11 leading-relaxed">
+                    Quando alguém usa seu link para se cadastrar, o sistema registra a indicação.
                   </p>
 
                   <div className="flex items-center mb-4">
@@ -242,7 +229,7 @@ const ReferralPanel = () => {
                     </div>
                     <h3 className="text-lg font-medium">Continue Indicando</h3>
                   </div>
-                  <p className="text-gray-600 mb-6 ml-11">
+                  <p className="text-gray-600 mb-6 ml-11 leading-relaxed">
                     Quanto mais você indicar, mais créditos você ganha. Não há limite!
                   </p>
                 </div>
@@ -252,7 +239,7 @@ const ReferralPanel = () => {
 
           {activeTab === 'history' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Histórico de Indicações</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Histórico de Indicações</h2>
 
               {history.length === 0 ? (
                 <div className="text-center py-8">
@@ -305,7 +292,7 @@ const ReferralPanel = () => {
 
           {activeTab === 'leaderboard' && (
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Ranking de Indicadores</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 text-center">Ranking de Indicadores</h2>
 
               {leaderboard.length === 0 ? (
                 <div className="text-center py-8">

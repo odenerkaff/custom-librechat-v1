@@ -45,7 +45,7 @@ const DeleteAccount = ({ disabled = false }: { title?: string; disabled?: boolea
     <>
       <OGDialog open={isDialogOpen} onOpenChange={setDialogOpen}>
         <div className="flex items-center justify-between">
-          <span>{localize('com_nav_delete_account')}</span>
+          <span className="text-base">{localize('com_nav_delete_account')}</span>
           <OGDialogTrigger asChild>
             <Button
               variant="destructive"

@@ -43,31 +43,41 @@ interface LeaderboardData {
 }
 
 export function useReferralData() {
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
 
   const { data, isLoading, error, refetch } = useQuery<ReferralData>({
     queryKey: ['referralData'],
     queryFn: async () => {
-      if (!isAuthenticated || !user?.token) {
+      if (!isAuthenticated || !token) {
+        console.log('[Referral Hook] User not authenticated:', { isAuthenticated, hasToken: !!token });
         throw new Error('User not authenticated');
       }
+
+      console.log('[Referral Hook] Making request to /api/referral/me with token');
 
       const response = await fetch('/api/referral/me', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         credentials: 'include',
       });
 
+      console.log('[Referral Hook] Response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to fetch referral data');
+        const errorData = await response.text();
+        console.error('[Referral Hook] API Error:', response.status, errorData);
+        throw new Error(`Failed to fetch referral data: ${response.status} - ${errorData}`);
       }
 
-      return response.json();
+      const jsonData = await response.json();
+      console.log('[Referral Hook] API Response:', jsonData);
+
+      return jsonData;
     },
-    enabled: !!(isAuthenticated && user?.token),
+    enabled: !!(isAuthenticated && token),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -80,19 +90,19 @@ export function useReferralData() {
 }
 
 export function useReferralHistory() {
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
 
   const { data, isLoading, error } = useQuery<ReferralHistory>({
     queryKey: ['referralHistory'],
     queryFn: async () => {
-      if (!isAuthenticated || !user?.token) {
+      if (!isAuthenticated || !token) {
         throw new Error('User not authenticated');
       }
 
       const response = await fetch('/api/referral/history', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         credentials: 'include',
@@ -104,7 +114,7 @@ export function useReferralHistory() {
 
       return response.json();
     },
-    enabled: !!(isAuthenticated && user?.token),
+    enabled: !!(isAuthenticated && token),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
@@ -117,19 +127,19 @@ export function useReferralHistory() {
 }
 
 export function useReferralLeaderboard(limit = 10) {
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
 
   const { data, isLoading, error } = useQuery<LeaderboardData>({
     queryKey: ['referralLeaderboard', limit],
     queryFn: async () => {
-      if (!isAuthenticated || !user?.token) {
+      if (!isAuthenticated || !token) {
         throw new Error('User not authenticated');
       }
 
       const response = await fetch(`/api/referral/leaderboard?limit=${limit}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         credentials: 'include',
@@ -141,7 +151,7 @@ export function useReferralLeaderboard(limit = 10) {
 
       return response.json();
     },
-    enabled: !!(isAuthenticated && user?.token),
+    enabled: !!(isAuthenticated && token),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
@@ -153,12 +163,12 @@ export function useReferralLeaderboard(limit = 10) {
 }
 
 export function useReferralActions() {
-  const { user, isAuthenticated } = useAuthContext();
+  const { user, token, isAuthenticated } = useAuthContext();
   const queryClient = useQueryClient();
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
 
   const shareReferralLink = async () => {
-    if (!isAuthenticated || !user?.token) {
+    if (!isAuthenticated || !token) {
       throw new Error('User not authenticated');
     }
 

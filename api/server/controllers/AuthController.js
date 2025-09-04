@@ -50,24 +50,39 @@ const registrationController = async (req, res) => {
         // Resolver referrer usando o código
         let referrer = null;
         if (Referral) {
-          // Buscar usuário pelo referralCode (comparando últimos 6 chars do _id)
-          const { User } = require('mongoose').models;
-          referrer = await User.findOne(
-            {},
-            {
-              _id: 1,
-              name: 1,
-              email: 1
+          try {
+            // Primeiro precisamos importar os modelos corretamente
+            const { User } = require('mongoose').models || models || {};
+            if (!User) {
+              throw new Error('User model not available');
             }
-          ).lean();
 
-          if (referrer) {
-            // Verificar se o código corresponde aos últimos 6 chars do _id
-            const expectedCode = referrer._id.toString().slice(-6).toUpperCase();
-            if (expectedCode !== referralCode.toUpperCase()) {
-              console.log(`[REGISTRATION] Referral code ${referralCode} does not match user ${referrer._id}`);
-              referrer = null;
+            // Buscar TODOS os usuários e filtrar pelo código (essa é a forma mais simples)
+            const allUsers = await User.find(
+              {},
+              {
+                _id: 1,
+                name: 1,
+                email: 1
+              }
+            ).lean();
+
+            // Encontrar usuário cujo ID termina com o código de referral
+            referrer = allUsers.find(user => {
+              // Pegar os últimos 6 caracteres do _id como string
+              const expectedCode = user._id.toString().slice(-6).toUpperCase();
+              return expectedCode === referralCode.toUpperCase();
+            });
+
+            if (referrer) {
+            console.log(`[REGISTRATION] ✅ ENCONTREI REFERRER: ${referrer.name} (${referrer.email}) - ID: ${referrer._id}`);
+            console.log(`[REGISTRATION] ✅ Código do referrer: ${referrer._id.toString().slice(-6).toUpperCase()}`);
+            } else {
+              console.log(`[REGISTRATION] No referrer found for code: ${referralCode}`);
             }
+          } catch (findError) {
+            console.error('[REGISTRATION] Error finding referrer:', findError.message);
+            referrer = null;
           }
         }
 

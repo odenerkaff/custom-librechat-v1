@@ -12,7 +12,7 @@ function Data() {
   useOnClickOutside(dataTabRef, () => confirmClearConvos && setConfirmClearConvos(false), []);
 
   return (
-    <div className="flex flex-col gap-3 p-1 text-sm text-text-primary">
+    <div className="flex flex-col gap-3 p-1 text-base text-text-primary">
       <div className="pb-3">
         <ImportConversations />
       </div>

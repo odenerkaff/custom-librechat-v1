@@ -160,7 +160,7 @@ function Speech() {
           <Tabs.Trigger
             onClick={() => setAdvancedMode(false)}
             className={cn(
-              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
+              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-base text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
               isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
               'w-full',
             )}
@@ -173,7 +173,7 @@ function Speech() {
           <Tabs.Trigger
             onClick={() => setAdvancedMode(true)}
             className={cn(
-              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
+              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-base text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
               isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
               'w-full',
             )}
@@ -187,7 +187,7 @@ function Speech() {
       </div>
 
       <Tabs.Content value={'simple'}>
-        <div className="flex flex-col gap-3 text-sm text-text-primary">
+        <div className="flex flex-col gap-3 text-base text-text-primary">
           <SpeechToTextSwitch />
           <EngineSTTDropdown external={sttExternal} />
           <LanguageSTTDropdown />
@@ -199,7 +199,7 @@ function Speech() {
       </Tabs.Content>
 
       <Tabs.Content value={'advanced'}>
-        <div className="flex flex-col gap-3 text-sm text-text-primary">
+        <div className="flex flex-col gap-3 text-base text-text-primary">
           <ConversationModeSwitch />
           <div className="mt-2 h-px bg-border-medium" role="none" />
           <SpeechToTextSwitch />

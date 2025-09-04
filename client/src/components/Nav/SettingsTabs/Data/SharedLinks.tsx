@@ -286,7 +286,7 @@ export default function SharedLinks() {
 
   return (
     <div className="flex items-center justify-between">
-      <div>{localize('com_nav_shared_links')}</div>
+      <span className="text-base">{localize('com_nav_shared_links')}</span>
 
       <OGDialog open={isOpen} onOpenChange={setIsOpen}>
         <OGDialogTrigger asChild onClick={() => setIsOpen(true)}>

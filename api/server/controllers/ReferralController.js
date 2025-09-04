@@ -1,16 +1,20 @@
 const mongoose = require('mongoose');
 
-// Import models
-let models;
+// Import models directly
+const Referral = require('~/models/Referral');
+let User, Balance;
+
 try {
   const { createModels } = require('@librechat/data-schemas');
-  models = createModels(mongoose);
+  const models = createModels(require('mongoose'));
+  User = models.User;
+  Balance = models.Balance;
 } catch (error) {
-  console.error('[Referral] Cannot load models from @librechat/data-schemas:', error.message);
-  throw new Error('Failed to create models');
+  console.error('[Referral] Cannot load User/Balance models from @librechat/data-schemas:', error.message);
+  // Fallback direto se data-schemas falhar
+  User = require('mongoose').models.User;
+  Balance = require('mongoose').models.Balance;
 }
-
-const { User, Balance, Referral } = models;
 
 // IMPORTANTE: Função de recompensa usando o sistema de balance existente
 const grantReferralReward = async (referrerId, rewardAmount = 500) => {

@@ -144,15 +144,15 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">{localize('com_nav_balance_auto_refill_settings')}</h3>
-      <div className="mb-1 flex justify-between text-sm">
+      <div className="mb-1 flex justify-between text-base">
         <span>{localize('com_nav_balance_last_refill')}</span>
         <span>{lastRefillDate ? lastRefillDate.toLocaleString() : '-'}</span>
       </div>
-      <div className="mb-1 flex justify-between text-sm">
+      <div className="mb-1 flex justify-between text-base">
         <span>{localize('com_nav_balance_refill_amount')}</span>
         <span>{refillAmount !== undefined ? refillAmount : '-'}</span>
       </div>
-      <div className="mb-1 flex justify-between text-sm">
+      <div className="mb-1 flex justify-between text-base">
         <span>{localize('com_nav_balance_interval')}</span>
         <span>
           {localize('com_nav_balance_every')} {refillIntervalValue}{' '}
@@ -162,12 +162,12 @@ const AutoRefillSettings: React.FC<AutoRefillSettingsProps> = ({
       <div className="flex items-center justify-between">
         {/* Left Section: Label */}
         <div className="flex items-center space-x-2">
-          <Label className="font-light">{localize('com_nav_balance_next_refill')}</Label>
+          <Label className="font-light text-base">{localize('com_nav_balance_next_refill')}</Label>
           <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_balance_next_refill_info')} />
         </div>
 
         {/* Right Section: tokenCredits Value */}
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-200" role="note">
+        <span className="text-base font-medium text-gray-800 dark:text-gray-200" role="note">
           {nextRefill ? nextRefill.toLocaleString() : '-'}
         </span>
       </div>

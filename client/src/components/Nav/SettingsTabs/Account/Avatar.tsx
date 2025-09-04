@@ -132,7 +132,7 @@ function Avatar() {
       }}
     >
       <div className="flex items-center justify-between">
-        <span>{localize('com_nav_profile_picture')}</span>
+        <span className="text-base">{localize('com_nav_profile_picture')}</span>
         <OGDialogTrigger ref={openButtonRef}>
           <Button variant="outline">
             <FileImage className="mr-2 flex w-[22px] items-center stroke-1" />

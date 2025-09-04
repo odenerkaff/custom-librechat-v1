@@ -48,14 +48,14 @@ export default function Personalization({
 
   if (!hasAnyPersonalizationFeature) {
     return (
-      <div className="flex flex-col gap-3 text-sm text-text-primary">
+      <div className="flex flex-col gap-3 text-base text-text-primary">
         <div className="text-text-secondary">{localize('com_ui_no_personalization_available')}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3 text-sm text-text-primary">
+    <div className="flex flex-col gap-3 text-base text-text-primary">
       {/* Memory Settings Section */}
       {hasMemoryOptOut && (
         <>

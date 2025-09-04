@@ -120,10 +120,10 @@ export default function Admin({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-6">
+    <div className="flex flex-col gap-4 p-4">
       <div className="border-b border-border-light pb-4">
         <h1 className="text-2xl font-bold">Painel de Administração</h1>
-        <p className="text-sm text-text-secondary mt-1">
+        <p className="text-base text-text-secondary mt-1">
           Gerencie usuários, configurações do sistema e monitore atividades
         </p>
       </div>
@@ -131,7 +131,7 @@ export default function Admin({ onClose }) {
       <div className="flex flex-col gap-6">
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <h2 className="text-lg font-semibold mb-3">Gerenciamento de Usuários</h2>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-base text-gray-600 mb-4">
             Gerencie todos os usuários da plataforma. Crie, edite, visualize e remova contas de usuário.
           </p>
 
@@ -184,26 +184,26 @@ export default function Admin({ onClose }) {
 
         <div className="bg-white rounded-lg p-6 shadow-sm">
           <h2 className="text-lg font-semibold mb-3">Configurações do Sistema</h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-base text-gray-600">
             Acesse recursos avançados de administração do sistema.
           </p>
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Logs do Sistema</h3>
-              <p className="text-sm text-gray-600">Visualize logs de atividades e erros</p>
+              <h3 className="text-base font-semibold mb-2">Logs do Sistema</h3>
+              <p className="text-base text-gray-600">Visualize logs de atividades e erros</p>
               <button
                 onClick={handleGoToLogs}
-                className="mt-2 text-blue-600 hover:underline text-sm"
+                className="mt-2 text-blue-600 hover:underline text-base"
               >
                 Verificar Logs
               </button>
             </div>
             <div className="p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Estatísticas</h3>
-              <p className="text-sm text-gray-600">Analise estatísticas de uso do sistema</p>
+              <h3 className="text-base font-semibold mb-2">Estatísticas</h3>
+              <p className="text-base text-gray-600">Analise estatísticas de uso do sistema</p>
               <button
                 onClick={handleGoToDashboard}
-                className="mt-2 text-blue-600 hover:underline text-sm"
+                className="mt-2 text-blue-600 hover:underline text-base"
               >
                 Ver Estatísticas
               </button>

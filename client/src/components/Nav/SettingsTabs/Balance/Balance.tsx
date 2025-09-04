@@ -32,7 +32,7 @@ function Balance() {
     refillIntervalValue !== undefined;
 
   return (
-    <div className="flex flex-col gap-4 p-4 text-sm text-text-primary">
+    <div className="flex flex-col gap-4 p-4 text-base text-text-primary">
       {/* Token credits display */}
       <TokenCreditsItem tokenCredits={tokenCredits} />
 
@@ -46,12 +46,12 @@ function Balance() {
             refillIntervalValue={refillIntervalValue}
           />
         ) : (
-          <div className="text-sm text-red-600">
+          <div className="text-base text-red-600">
             {localize('com_nav_balance_auto_refill_error')}
           </div>
         )
       ) : (
-        <div className="text-sm text-gray-600">
+        <div className="text-base text-gray-600">
           {localize('com_nav_balance_auto_refill_disabled')}
         </div>
       )}
