@@ -3,6 +3,7 @@ const { checkAdmin, requireJwtAuth } = require('~/server/middleware');
 const {
   listUsersController,
   createUserController,
+  createRandomUsersController,
   updateUserController,
   deleteUserController,
   getUserDetailsController
@@ -19,6 +20,9 @@ router.get('/users', listUsersController);
 
 // Create new user
 router.post('/users', createUserController);
+
+// Create random users for testing
+router.post('/users/random', createRandomUsersController);
 
 // Get user details
 router.get('/users/:id', getUserDetailsController);

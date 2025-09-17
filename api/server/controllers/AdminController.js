@@ -39,6 +39,9 @@ try {
 
 console.log('[ADMIN API] All imports completed');
 
+const ONLINE_THRESHOLD_MINUTES = 5;
+const ONLINE_THRESHOLD_MS = ONLINE_THRESHOLD_MINUTES * 60 * 1000;
+
 // List all users for admin panel
 const listUsersController = async (req, res) => {
   try {
@@ -83,11 +86,16 @@ const listUsersController = async (req, res) => {
           if (Referral) {
             const referralRecord = await Referral.findOne({ referredUser: user._id }).lean();
             if (referralRecord) {
-              source = 'Indicação';
+              source = 'Indicacao';
             }
           }
 
-          console.log(`[ADMIN API] User ${user.name} (${user.email}) balance: ${balance}, source: ${source}`);
+          const activitySource = user.lastActive || user.updatedAt || user.createdAt;
+          const lastActivityDate = activitySource ? new Date(activitySource) : null;
+          const lastActivityIso = lastActivityDate ? lastActivityDate.toISOString() : null;
+          const isOnline = lastActivityDate ? Date.now() - lastActivityDate.getTime() <= ONLINE_THRESHOLD_MS : false;
+
+          console.log(`[ADMIN API] User ${user.name} (${user.email}) balance: ${balance}, source: ${source}, lastActivity: ${lastActivityIso ?? 'N/A'}, online: ${isOnline}`);
 
           return {
             id: user._id,
@@ -95,7 +103,8 @@ const listUsersController = async (req, res) => {
             email: user.email || 'Sem email',
             role: user.role || 'USER',
             createdAt: user.createdAt,
-            lastActivity: user.lastActive || user.updatedAt,
+            lastActivity: lastActivityIso,
+            isOnline,
             balance: balance,
             source: source,
             provider: user.provider || 'local',
@@ -104,13 +113,15 @@ const listUsersController = async (req, res) => {
           };
         } catch (error) {
           console.error(`[ADMIN API] Error loading data for user ${user.name}:`, error);
+          const fallbackActivity = user.updatedAt ? new Date(user.updatedAt).toISOString() : null;
           return {
             id: user._id,
             name: user.name || 'Sem nome',
             email: user.email || 'Sem email',
             role: user.role || 'USER',
             createdAt: user.createdAt,
-            lastActivity: user.updatedAt,
+            lastActivity: fallbackActivity,
+            isOnline: false,
             balance: 0, // Fallback to 0 if balance loading fails
             source: 'Outros', // Fallback to 'Outros' if referral check fails
             provider: user.provider || 'local',
@@ -313,7 +324,10 @@ const getUserDetailsController = async (req, res) => {
 
     // Get balance directly from Balance model
     const balanceRecord = await Balance.findOne({ user: user._id }).lean();
-    const lastActivity = user.lastActive ? user.lastActive : user.updatedAt;
+    const activitySource = user.lastActive || user.updatedAt || user.createdAt;
+    const lastActivityDate = activitySource ? new Date(activitySource) : null;
+    const lastActivity = lastActivityDate ? lastActivityDate.toISOString() : null;
+    const isOnline = lastActivityDate ? Date.now() - lastActivityDate.getTime() <= ONLINE_THRESHOLD_MS : false;
 
     res.status(200).send({
       id: user._id,
@@ -322,7 +336,8 @@ const getUserDetailsController = async (req, res) => {
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      lastActivity: lastActivity,
+      lastActivity,
+      isOnline,
       balance: balanceRecord?.tokenCredits || 0,
       provider: user.provider,
       avatar: user.avatar,
@@ -334,9 +349,136 @@ const getUserDetailsController = async (req, res) => {
   }
 };
 
+const firstNames = [
+  'João', 'Maria', 'Pedro', 'Ana', 'Carlos', 'Mariana', 'Lucas', 'Julia', 'Fernando', 'Beatriz',
+  'Gabriel', 'Camila', 'Rafael', 'Larissa', 'Diego', 'Amanda', 'Bruno', 'Carolina', 'Gustavo', 'Isabela',
+  'Henrique', 'Sophia', 'Leonardo', 'Alice', 'Matheus', 'Laura', 'Felipe', 'Valentina', 'Vinicius', 'Helena'
+];
+
+const lastNames = [
+  'Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira', 'Almeida', 'Costa', 'Gomes', 'Martins',
+  'Araujo', 'Melo', 'Barbosa', 'Ribeiro', 'Alves', 'Pereira', 'Lima', 'Carvalho', 'Teixeira', 'Moreira'
+];
+
+const domains = [
+  'gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'uol.com.br', 'bol.com.br', 'terra.com.br'
+];
+
+function generateRandomUser() {
+  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+  const fullName = `${firstName} ${lastName}`;
+  const domain = domains[Math.floor(Math.random() * domains.length)];
+  const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${domain}`;
+  const password = Math.random().toString(36).slice(-12) + 'Aa1!';
+
+  return {
+    name: fullName,
+    email: email,
+    password: password,
+    username: email.split('@')[0]
+  };
+}
+
+// Create multiple random users for testing
+const createRandomUsersController = async (req, res) => {
+  try {
+    const { count = 20 } = req.body;
+    const maxUsers = Math.min(parseInt(count) || 20, 50); // Limit to 50 users max
+
+    console.log(`[ADMIN API] Creating ${maxUsers} random users for testing...`);
+
+    const usersToCreate = [];
+    const maxAttempts = 100; // Prevent infinite loops
+
+    // Generate unique users
+    for (let i = 0; i < maxUsers && usersToCreate.length < maxUsers; i++) {
+      let attempts = 0;
+      let userGenerated = false;
+
+      while (!userGenerated && attempts < maxAttempts) {
+        const userData = generateRandomUser();
+
+        // Check if user already exists
+        const existingUser = await User.findOne({
+          $or: [{ email: userData.email }, { username: userData.username }]
+        });
+
+        if (!existingUser) {
+          usersToCreate.push(userData);
+          userGenerated = true;
+        }
+
+        attempts++;
+      }
+
+      if (!userGenerated) {
+        console.warn(`[ADMIN API] Could not generate unique user after ${maxAttempts} attempts`);
+      }
+    }
+
+    console.log(`[ADMIN API] Generated ${usersToCreate.length} unique users`);
+
+    const createdUsers = [];
+    const failedUsers = [];
+
+    // Create users one by one
+    for (const userData of usersToCreate) {
+      try {
+        const user = {
+          email: userData.email,
+          password: userData.password,
+          name: userData.name,
+          username: userData.username,
+          confirm_password: userData.password
+        };
+
+        const result = await registerUser(user, { emailVerified: true });
+
+        if (result.status !== 200) {
+          console.error(`[ADMIN API] Failed to create user ${userData.email}:`, result.message);
+          failedUsers.push({ ...userData, error: result.message });
+        } else {
+          console.log(`[ADMIN API] ✅ Created user: ${userData.name} (${userData.email})`);
+          createdUsers.push({
+            name: userData.name,
+            email: userData.email,
+            password: userData.password // Include password for reference
+          });
+        }
+      } catch (error) {
+        console.error(`[ADMIN API] Error creating user ${userData.email}:`, error.message);
+        failedUsers.push({ ...userData, error: error.message });
+      }
+    }
+
+    const response = {
+      success: true,
+      message: `Criados ${createdUsers.length} usuários aleatórios com sucesso`,
+      created: createdUsers.length,
+      failed: failedUsers.length,
+      users: createdUsers,
+      failures: failedUsers.length > 0 ? failedUsers : undefined
+    };
+
+    console.log(`[ADMIN API] ✅ Operation completed: ${createdUsers.length} created, ${failedUsers.length} failed`);
+
+    res.status(200).json(response);
+
+  } catch (error) {
+    console.error('[ADMIN API] Error in createRandomUsersController:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao criar usuários aleatórios',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   listUsersController,
   createUserController,
+  createRandomUsersController,
   updateUserController,
   deleteUserController,
   getUserDetailsController

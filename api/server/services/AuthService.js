@@ -388,6 +388,13 @@ const setAuthTokens = async (userId, res, sessionId = null) => {
       secure: isProduction,
       sameSite: 'strict',
     });
+
+    try {
+      await updateUser(userId, { lastActive: new Date() });
+    } catch (updateError) {
+      logger.warn(`[setAuthTokens] Failed to update lastActive for user ${userId}:`, updateError);
+    }
+
     return token;
   } catch (error) {
     logger.error('[setAuthTokens] Error in setting authentication tokens:', error);
@@ -534,3 +541,4 @@ module.exports = {
   hashPassword,
   validatePassword,
 };
+

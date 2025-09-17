@@ -11,7 +11,8 @@ interface UserWithActivity {
   email: string;
   role: string;
   createdAt: string;
-  lastActivity: string;
+  lastActivity: string | null;
+  isOnline?: boolean;
   balance: number | string;
   source: string;
 }
@@ -250,16 +251,24 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
 
     if (!response.ok) {
       if (response.status === 403) {
-        throw new Error('Acesso negado - Você não tem permissão para editar este usuário');
+        throw new Error('Acesso negado - Você nÃ£o tem permissÃ£o para editar este usuário');
       }
       if (response.status === 401) {
-        throw new Error('Não autenticado - faça login novamente');
+        throw new Error('Nao autenticado - faca login novamente');
       }
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Erro ao salvar usuário');
+      throw new Error(errorData.message || 'Erro ao salvar usuario');
     }
 
     const result = await response.json();
+    const updatedName = typeof result.name === 'string' ? result.name : userData.name;
+    const updatedEmail = typeof result.email === 'string' ? result.email : userData.email;
+    const updatedRole = typeof result.role === 'string' ? result.role : userData.role;
+    const updatedBalanceRaw = result.balance ?? userData.balance;
+    const updatedBalance =
+      typeof updatedBalanceRaw === 'number'
+        ? updatedBalanceRaw
+        : Number(updatedBalanceRaw ?? userData.balance ?? 0) || 0;
 
     // Update the cache with the new user data
     queryClient.setQueryData<UserWithActivity[]>(['adminUsers'], (existing) => {
@@ -268,14 +277,26 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
         user.id === userId
           ? {
               ...user,
-              name: result.name || userData.name,
-              email: result.email || userData.email,
-              role: result.role || userData.role,
-              balance: result.balance ?? userData.balance,
+              name: updatedName,
+              email: updatedEmail,
+              role: updatedRole,
+              balance: updatedBalance,
             }
           : user
       );
     });
+
+    setEditingUserDetails((current) =>
+      current && current.id === userId
+        ? {
+            ...current,
+            name: updatedName,
+            email: updatedEmail,
+            role: updatedRole,
+            balance: updatedBalance,
+          }
+        : current
+    );
 
     await queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
   };
@@ -335,7 +356,7 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
     }
   };
 
-  const formatDate = (value: string) => {
+  const formatDateTime = (value?: string | null) => {
     if (!value) {
       return '-';
     }
@@ -343,7 +364,7 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
     if (Number.isNaN(parsed.getTime())) {
       return value;
     }
-    return parsed.toLocaleDateString('pt-BR');
+    return parsed.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   };
 
   const totalUsers = Array.isArray(users) ? users.length : 0;
@@ -537,7 +558,14 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
                             {userItem.role === 'ADMIN' ? 'Admin' : 'Usuário'}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-500">{formatDate(userItem.lastActivity)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-block h-2 w-2 rounded-full ${userItem.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
+                            <span className={userItem.isOnline ? 'text-green-600 font-medium' : 'text-gray-600'}>
+                              {userItem.isOnline ? 'Online agora' : formatDateTime(userItem.lastActivity)}
+                            </span>
+                          </div>
+                        </td>
                         <td className="px-4 py-3 text-sm text-gray-500">Free</td>
                       </tr>
                     );

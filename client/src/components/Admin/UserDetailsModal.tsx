@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface UserWithActivity {
   id: string;
@@ -6,7 +6,8 @@ interface UserWithActivity {
   email: string;
   role: string;
   createdAt: string;
-  lastActivity: string;
+  lastActivity: string | null;
+  isOnline?: boolean;
   balance: number | string;
   source: string;
 }
@@ -46,21 +47,41 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string>('');
 
-  // Reset form when modal opens or user changes
+  const prevUserIdRef = useRef<string | null>(null);
+
+  // Sync form state when modal opens or selected user changes
   useEffect(() => {
-    if (isOpen && user) {
+    if (!isOpen) {
+      if (isEditing) {
+        setIsEditing(false);
+      }
+      prevUserIdRef.current = null;
+      return;
+    }
+
+    if (!user) {
+      return;
+    }
+
+    const userChanged = prevUserIdRef.current !== user.id;
+
+    if (userChanged) {
+      setIsEditing(false);
+    }
+
+    if (userChanged || !isEditing) {
       setFormData({
         name: user.name,
         email: user.email,
         role: user.role,
-        balance: Number(user.balance) || 0
+        balance: Number(user.balance) || 0,
       });
       setErrors({});
       setSubmitError('');
-      // Reset editing state when opening modal
-      setIsEditing(false);
     }
-  }, [isOpen, user]);
+
+    prevUserIdRef.current = user.id;
+  }, [isOpen, user, isEditing]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<UserDetailsFormData> = {};
@@ -83,27 +104,38 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
 
-    if (!user || !validateForm()) {
+    if (!user || !isEditing) {
+      return;
+    }
+
+    if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
     setSubmitError('');
 
+    let shouldClose = false;
+
     try {
       await onSave(user.id, formData);
       setIsEditing(false);
+      shouldClose = true;
     } catch (error) {
       console.error('Error updating user:', error);
-      setSubmitError(error instanceof Error ? error.message : 'Erro ao salvar usuário');
+      setSubmitError(error instanceof Error ? error.message : 'Erro ao salvar usuario');
     } finally {
       setIsSubmitting(false);
+      if (shouldClose) {
+        onClose();
+      }
     }
   };
-
   const handleInputChange = (field: keyof UserDetailsFormData, value: string | number) => {
     if (field === 'balance') {
       setFormData(prev => ({ ...prev, [field]: Number(value) || 0 }));
@@ -126,12 +158,15 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 
   if (!isOpen || !user) return null;
 
-  const formatDate = (value: string) => {
+  const formatDate = (value?: string | null) => {
     if (!value) return '-';
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
-    return parsed.toLocaleDateString('pt-BR');
+    return parsed.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
   };
+
+  const lastActivityDisplay = user.isOnline ? 'Online agora' : formatDate(user.lastActivity);
+  const lastActivityStyles = user.isOnline ? 'text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md' : 'text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-md';
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -253,7 +288,7 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Última Atividade
               </label>
-              <p className="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-md">{formatDate(user.lastActivity)}</p>
+              <p className={lastActivityStyles}>{lastActivityDisplay}</p>
             </div>
 
             <div>
@@ -296,7 +331,8 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
                   Cancelar
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={() => handleSubmit()}
                   className="px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-50"
                   disabled={isSubmitting || (isCurrentUser && user.role === 'ADMIN' && formData.role !== 'ADMIN')}
                 >
@@ -330,3 +366,6 @@ const UserDetailsModal: React.FC<UserDetailsModalProps> = ({
 };
 
 export default UserDetailsModal;
+
+
+
