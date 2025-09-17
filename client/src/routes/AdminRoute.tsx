@@ -10,6 +10,18 @@ export default function AdminRoute() {
   const [activeTab, setActiveTab] = React.useState('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
+  // Auto-collapse sidebar on smaller screens
+  React.useEffect(() => {
+    const checkScreenSize = () => {
+      const isSmallScreen = window.innerWidth < 1024; // lg breakpoint
+      setSidebarCollapsed(isSmallScreen);
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   // Check if user is admin
   if (user?.role !== 'ADMIN') {
     return (
@@ -187,15 +199,17 @@ export default function AdminRoute() {
     return (
       <SetConvoProvider>
         <FileMapContext.Provider value={fileMap}>
-          <div className="flex min-h-screen bg-gray-50">
+          <div className="flex h-screen bg-gray-50 overflow-hidden">
             <AdminSidebar
               activeTab={activeTab}
               setActiveTab={handleTabChange}
               collapsed={sidebarCollapsed}
               onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
-            <div className="flex-1 flex flex-col">
-              {renderAdminContent()}
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+              <div className="flex-1 overflow-auto">
+                {renderAdminContent()}
+              </div>
             </div>
           </div>
         </FileMapContext.Provider>
