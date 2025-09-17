@@ -199,7 +199,7 @@ export default function AdminRoute() {
     return (
       <SetConvoProvider>
         <FileMapContext.Provider value={fileMap}>
-          <div className="flex" style={{ height: '100vh' }}>
+          <div className="flex h-full">
             <AdminSidebar
               activeTab={activeTab}
               setActiveTab={handleTabChange}
@@ -207,7 +207,7 @@ export default function AdminRoute() {
               onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             />
             <div className="flex-1 flex flex-col min-w-0">
-              <div className="flex-1 overflow-auto" style={{ maxHeight: '100vh' }}>
+              <div className="flex-1 overflow-auto">
                 {renderAdminContent()}
               </div>
             </div>

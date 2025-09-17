@@ -384,7 +384,7 @@ const AdminPanel = ({ showStats = true, showTable = true }: AdminPanelProps) => 
 
 
   return (
-    <div className="h-full px-2 py-4 md:px-6 md:py-6 max-w-full overflow-auto">
+    <div className="h-full px-2 py-4 md:px-6 md:py-6 max-w-full">
       {showStats && (
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Painel de administracao</h1>
