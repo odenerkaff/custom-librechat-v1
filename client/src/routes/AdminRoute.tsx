@@ -8,6 +8,7 @@ export default function AdminRoute() {
   const { user } = useAuthContext();
   const fileMap = useFileMap({ isAuthenticated: !!user });
   const [activeTab, setActiveTab] = React.useState('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   // Check if user is admin
   if (user?.role !== 'ADMIN') {
@@ -21,65 +22,116 @@ export default function AdminRoute() {
     );
   }
 
-  const AdminSidebar = ({ activeTab, setActiveTab }: {
+  const AdminSidebar = ({
+    activeTab,
+    setActiveTab,
+    collapsed,
+    onToggleCollapse
+  }: {
     activeTab: string;
     setActiveTab: (tab: string) => void;
+    collapsed: boolean;
+    onToggleCollapse: () => void;
   }) => (
-    <div className="w-64 bg-white border-r border-border-light flex flex-col">
-      <div className="p-6 border-b border-border-light">
-        <h2 className="text-lg font-semibold text-text-primary">Administração</h2>
-        <p className="text-sm text-text-secondary">Painel de Controle</p>
+    <div className={`${collapsed ? 'w-16' : 'w-72'} bg-white border-r border-border-light flex flex-col transition-all duration-300 ease-in-out`}>
+      <div className={`${collapsed ? 'p-4' : 'p-6'} border-b border-border-light`}>
+        {!collapsed && (
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-text-primary">Administração</h2>
+            <button
+              onClick={onToggleCollapse}
+              className="p-1 rounded hover:bg-gray-100 transition-colors"
+              title="Recolher menu"
+            >
+              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {!collapsed && (
+          <p className="text-sm text-text-secondary">Painel de Controle</p>
+        )}
+        {collapsed && (
+          <button
+            onClick={onToggleCollapse}
+            className="p-1 rounded hover:bg-gray-100 transition-colors mx-auto"
+            title="Expandir menu"
+          >
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 p-4 space-y-2">
-        <button
-          onClick={() => window.location.href = '/c/new'}
-          className="w-full text-left px-3 py-2 rounded-lg transition-colors bg-green-100 text-green-700 hover:bg-green-200"
-        >
-          ← Voltar ao Chat
-        </button>
-
-        <hr className="my-2" />
+      <nav className={`${collapsed ? 'p-2' : 'p-4'} space-y-2`}>
+        {!collapsed && (
+          <>
+            <button
+              onClick={() => window.location.href = '/c/new'}
+              className="w-full text-left px-3 py-2 rounded-lg transition-colors bg-green-100 text-green-700 hover:bg-green-200 whitespace-nowrap"
+            >
+              ← Voltar ao Chat
+            </button>
+            <hr className="my-2" />
+          </>
+        )}
 
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+          className={`${collapsed ? 'w-full px-2 py-3 text-center' : 'w-full text-left px-3 py-2'} rounded-lg transition-colors ${
             activeTab === 'dashboard'
               ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
+          title={collapsed ? 'Dashboard' : undefined}
         >
-          📊 Dashboard
+          {collapsed ? '📊' : '📊 Dashboard'}
         </button>
 
         <button
           onClick={() => setActiveTab('users')}
-          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+          className={`${collapsed ? 'w-full px-2 py-3 text-center' : 'w-full text-left px-3 py-2'} rounded-lg transition-colors ${
             activeTab === 'users'
               ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
+          title={collapsed ? 'Usuários' : undefined}
         >
-          👥 Usuários
+          {collapsed ? '👥' : '👥 Usuários'}
         </button>
 
         <button
           onClick={() => setActiveTab('logs')}
-          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+          className={`${collapsed ? 'w-full px-2 py-3 text-center' : 'w-full text-left px-3 py-2'} rounded-lg transition-colors ${
             activeTab === 'logs'
               ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
               : 'text-gray-700 hover:bg-gray-50'
           }`}
+          title={collapsed ? 'Logs do Sistema' : undefined}
         >
-          📋 Logs do Sistema
+          {collapsed ? '📋' : '📋 Logs do Sistema'}
         </button>
+
+        {collapsed && (
+          <button
+            onClick={() => window.location.href = '/c/new'}
+            className="w-full px-2 py-3 text-center rounded-lg transition-colors bg-green-100 text-green-700 hover:bg-green-200"
+            title="Voltar ao Chat"
+          >
+            ←
+          </button>
+        )}
       </nav>
 
-      <div className="p-4 border-t border-border-light">
-        <div className="text-xs text-gray-500">
-          Conectado como: {user?.name || user?.email}
+      {!collapsed && (
+        <div className="p-4 border-t border-border-light">
+          <div className="text-xs text-gray-500">
+            Conectado como: {user?.name || user?.email}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -135,9 +187,14 @@ export default function AdminRoute() {
     return (
       <SetConvoProvider>
         <FileMapContext.Provider value={fileMap}>
-          <div className="flex h-screen bg-gray-50">
-            <AdminSidebar activeTab={activeTab} setActiveTab={handleTabChange} />
-            <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex min-h-screen bg-gray-50">
+            <AdminSidebar
+              activeTab={activeTab}
+              setActiveTab={handleTabChange}
+              collapsed={sidebarCollapsed}
+              onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+            />
+            <div className="flex-1 flex flex-col">
               {renderAdminContent()}
             </div>
           </div>

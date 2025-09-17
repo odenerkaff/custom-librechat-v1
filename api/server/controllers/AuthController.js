@@ -17,37 +17,58 @@ const { getGraphApiToken } = require('~/server/services/GraphTokenService');
 const registrationController = async (req, res) => {
   try {
     // Verificar se há um código de referral na query string
-    const referralCode = req.query.ref;
+    const referralCode = req.query.ref || req.body?.referralCode || req.body?.ref;
 
     console.log(`[REGISTRATION] Starting registration for user: ${req.body.email}`);
     if (referralCode) {
       console.log(`[REGISTRATION] Referral code detected: ${referralCode}`);
     }
 
-    // Primeiro criar o usuário normalmente
+    // Verificar se o usuario ja existia antes do registro
+    const preExistingUser = await findUser({ email: req.body.email }, '_id');
+
+    // Primeiro criar o usuario normalmente
     const response = await registerUser(req.body);
     const { status, message } = response;
 
-    // Se usuário foi criado com sucesso E há código de referral
-    if (status === 201 && referralCode) {
+    // Apenas processar referral se o usuario nao existia antes e o cadastro foi bem-sucedido
+    if (!preExistingUser && status >= 200 && status < 300 && referralCode) {
       try {
         console.log(`[REGISTRATION] User created successfully, processing referral code: ${referralCode}`);
 
         // Criar instancias dos modelos para usar na criação do referral
         let models;
         let Referral;
+        let Balance;
         try {
           const { createModels } = require('@librechat/data-schemas');
           models = createModels(require('mongoose'));
-          Referral = models.Referral;
-          console.log('[REGISTRATION] Referral model loaded successfully');
+          Referral = models?.Referral;
+          Balance = models?.Balance;
+          if (Referral) {
+            console.log('[REGISTRATION] Referral model loaded successfully');
+          } else {
+            console.warn('[REGISTRATION] Referral model not provided by data-schemas, using fallback');
+          }
         } catch (modelError) {
-          console.error('[REGISTRATION] Failed to load referral model:', modelError.message);
-          // Continue sem referral se houver erro no modelo
-          return res.status(status).send({ message });
+          console.error('[REGISTRATION] Failed to load referral model from data-schemas:', modelError.message);
         }
 
-        // Resolver referrer usando o código
+        if (!Referral) {
+          try {
+            Referral = require('~/models/Referral');
+            console.log('[REGISTRATION] Referral model loaded via fallback');
+          } catch (fallbackError) {
+            console.error('[REGISTRATION] Unable to load referral model from fallback:', fallbackError.message);
+            return res.status(status).send({ message });
+          }
+        }
+
+        if (!Balance) {
+          Balance = require('mongoose').models?.Balance;
+        }
+
+        // Resolver referrer usando o codigo
         let referrer = null;
         if (Referral) {
           try {
@@ -109,17 +130,21 @@ const registrationController = async (req, res) => {
 
             // IMPORTANTE: Dar recompensa de 500 créditos ao referrer
             try {
-              const { Balance } = models;
+              const balanceModel = Balance || (models && models.Balance) || require('mongoose').models?.Balance;
+
+              if (!balanceModel) {
+                throw new Error('Balance model not available');
+              }
 
               // Buscar balance atual do referrer
-              const balanceRecord = await Balance.findOne({ user: referrer._id }).lean();
+              const balanceRecord = await balanceModel.findOne({ user: referrer._id }).lean();
 
               const rewardAmount = 500;
               console.log(`[REGISTRATION] Granting ${rewardAmount} credits to referrer ${referrer.name}`);
 
               if (balanceRecord) {
                 // Atualizar balance existente
-                await Balance.findOneAndUpdate(
+                await balanceModel.findOneAndUpdate(
                   { user: referrer._id },
                   {
                     $inc: { tokenCredits: rewardAmount },
@@ -130,7 +155,7 @@ const registrationController = async (req, res) => {
                 console.log(`[REGISTRATION] Updated balance for referrer: +${rewardAmount} credits`);
               } else {
                 // Criar novo balance se não existir
-                const newBalance = new Balance({
+                const newBalance = new balanceModel({
                   user: referrer._id,
                   tokenCredits: rewardAmount,
                   context: 'referral-reward-initial',
@@ -323,3 +348,5 @@ module.exports = {
   resetPasswordRequestController,
   graphTokenController,
 };
+
+

@@ -255,7 +255,6 @@ const ReferralPanel = () => {
                     <thead className="bg-gray-50 border-b">
                       <tr>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Nome</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Email</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Data</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-500">Créditos</th>
@@ -266,9 +265,6 @@ const ReferralPanel = () => {
                         <tr key={referral.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 font-medium text-gray-900">
                             {referral.referredUser.name}
-                          </td>
-                          <td className="px-4 py-3 text-gray-600">
-                            {referral.referredUser.email}
                           </td>
                           <td className="px-4 py-3">
                             <span className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
@@ -344,3 +340,4 @@ const ReferralPanel = () => {
 };
 
 export default ReferralPanel;
+

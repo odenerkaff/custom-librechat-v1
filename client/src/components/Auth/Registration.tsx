@@ -31,6 +31,7 @@ const Registration: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get('token');
+  const referralCode = queryParams.get('ref');
   const validTheme = theme === 'dark' ? 'dark' : 'light';
 
   // only require captcha if we have a siteKey
@@ -123,7 +124,7 @@ const Registration: React.FC = () => {
             aria-label="Registration form"
             method="POST"
             onSubmit={handleSubmit((data: TRegisterUser) =>
-              registerUser.mutate({ ...data, token: token ?? undefined }),
+              registerUser.mutate({ ...data, token: token ?? undefined, referralCode: referralCode ?? undefined }),
             )}
           >
             {renderInput('name', 'com_auth_full_name', 'text', {
@@ -227,3 +228,4 @@ const Registration: React.FC = () => {
 };
 
 export default Registration;
+

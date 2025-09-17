@@ -378,17 +378,20 @@ export type TRegisterUser = {
   password: string;
   confirm_password?: string;
   token?: string;
+  referralCode?: string;
 };
 
 export type TLoginUser = {
   email: string;
   password: string;
   token?: string;
+  referralCode?: string;
   backupCode?: string;
 };
 
 export type TLoginResponse = {
   token?: string;
+  referralCode?: string;
   user?: TUser;
   twoFAPending?: boolean;
   tempToken?: string;
@@ -402,6 +405,7 @@ export type TEnable2FAResponse = {
 
 export type TVerify2FARequest = {
   token?: string;
+  referralCode?: string;
   backupCode?: string;
 };
 
@@ -415,11 +419,13 @@ export type TVerify2FAResponse = {
 export type TVerify2FATempRequest = {
   tempToken: string;
   token?: string;
+  referralCode?: string;
   backupCode?: string;
 };
 
 export type TVerify2FATempResponse = {
   token?: string;
+  referralCode?: string;
   user?: TUser;
   message?: string;
 };
@@ -429,6 +435,7 @@ export type TVerify2FATempResponse = {
  */
 export type TDisable2FARequest = {
   token?: string;
+  referralCode?: string;
   backupCode?: string;
 };
 
@@ -649,3 +656,4 @@ export type TBalanceResponse = {
   lastRefill?: Date;
   refillAmount?: number;
 };
+

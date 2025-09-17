@@ -15,7 +15,7 @@ try {
 }
 
 // Extract individual models
-const { User, Balance } = models;
+const { User, Balance, Referral } = models;
 
 // Check if User is properly imported
 if (!User || typeof User.find !== 'function') {
@@ -69,8 +69,8 @@ const listUsersController = async (req, res) => {
     console.log('[ADMIN API DEBUG] MongoDB query successful, found:', users.length);
     console.log('[ADMIN API DEBUG] First user sample:', users[0]?.email || 'No users found');
 
-    // Load balance for each user
-    console.log('[ADMIN API] Loading balance for each user...');
+    // Load balance and referral info for each user
+    console.log('[ADMIN API] Loading balance and referral info for each user...');
     const usersWithBalance = await Promise.all(
       users.map(async (user) => {
         try {
@@ -78,7 +78,16 @@ const listUsersController = async (req, res) => {
           const balanceRecord = await Balance.findOne({ user: user._id }).lean();
           const balance = balanceRecord?.tokenCredits || 0;
 
-          console.log(`[ADMIN API] User ${user.name} (${user.email}) balance: ${balance}`);
+          // Check if user was referred (has a referral record as referredUser)
+          let source = 'Outros';
+          if (Referral) {
+            const referralRecord = await Referral.findOne({ referredUser: user._id }).lean();
+            if (referralRecord) {
+              source = 'Indicação';
+            }
+          }
+
+          console.log(`[ADMIN API] User ${user.name} (${user.email}) balance: ${balance}, source: ${source}`);
 
           return {
             id: user._id,
@@ -88,12 +97,13 @@ const listUsersController = async (req, res) => {
             createdAt: user.createdAt,
             lastActivity: user.lastActive || user.updatedAt,
             balance: balance,
+            source: source,
             provider: user.provider || 'local',
             avatar: user.avatar,
             emailVerified: user.emailVerified || false
           };
         } catch (error) {
-          console.error(`[ADMIN API] Error loading balance for user ${user.name}:`, error);
+          console.error(`[ADMIN API] Error loading data for user ${user.name}:`, error);
           return {
             id: user._id,
             name: user.name || 'Sem nome',
@@ -102,6 +112,7 @@ const listUsersController = async (req, res) => {
             createdAt: user.createdAt,
             lastActivity: user.updatedAt,
             balance: 0, // Fallback to 0 if balance loading fails
+            source: 'Outros', // Fallback to 'Outros' if referral check fails
             provider: user.provider || 'local',
             avatar: user.avatar,
             emailVerified: user.emailVerified || false
@@ -215,17 +226,51 @@ const createUserController = async (req, res) => {
 const updateUserController = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, role } = req.body;
+    const { name, email, role, balance, credits, tokenCredits } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
 
     const updateData = {};
-    if (name) updateData.name = name;
-    if (email) updateData.email = email.toLowerCase();
-    if (role) updateData.role = role;
+    if (typeof name === "string" && name.trim()) updateData.name = name.trim();
+    if (typeof email === "string" && email.trim()) updateData.email = email.trim().toLowerCase();
+    if (typeof role === "string" && role.trim()) updateData.role = role.trim();
 
-    const updatedUser = await updateUser(id, updateData);
+    let updatedUser;
+    if (Object.keys(updateData).length > 0) {
+      updatedUser = await updateUser(id, updateData);
+    } else {
+      updatedUser = await User.findById(id, "-password -totpSecret -backupCodes");
+    }
 
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
+    }
+
+    const balancePayload = balance ?? credits ?? tokenCredits;
+    let balanceRecord = null;
+
+    if (balancePayload !== undefined) {
+      const parsedBalance = Number(balancePayload);
+      if (!Number.isFinite(parsedBalance) || parsedBalance < 0) {
+        return res.status(400).json({ message: 'Invalid balance value' });
+      }
+
+      balanceRecord = await Balance.findOneAndUpdate(
+        { user: updatedUser._id },
+        {
+          $set: { tokenCredits: parsedBalance },
+          $setOnInsert: { user: updatedUser._id },
+        },
+        {
+          new: true,
+          upsert: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    } else {
+      balanceRecord = await Balance.findOne({ user: updatedUser._id }).lean();
     }
 
     res.status(200).send({
@@ -233,7 +278,8 @@ const updateUserController = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      updatedAt: updatedUser.updatedAt
+      balance: balanceRecord?.tokenCredits || 0,
+      updatedAt: updatedUser.updatedAt,
     });
   } catch (error) {
     logger.error('[updateUserController]', error);

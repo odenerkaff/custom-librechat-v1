@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { SettingsTabValues } from 'librechat-data-provider';
+import { SettingsTabValues, SystemRoles } from 'librechat-data-provider';
 import { MessageSquare, Command, DollarSign, Users } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react';
 import {
@@ -25,7 +25,7 @@ import {
   Referral,
 } from './SettingsTabs';
 import usePersonalizationAccess from '~/hooks/usePersonalizationAccess';
-import { useLocalize, TranslationKeys } from '~/hooks';
+import { useLocalize, TranslationKeys, useAuthContext } from '~/hooks';
 import { useGetStartupConfig } from '~/data-provider';
 import { cn } from '~/utils';
 
@@ -36,38 +36,53 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
   const [activeTab, setActiveTab] = useState(SettingsTabValues.GENERAL);
   const tabRefs = useRef({});
   const { hasAnyPersonalizationFeature, hasMemoryOptOut } = usePersonalizationAccess();
+  const { user } = useAuthContext();
+  const isAdminUser = user?.role === SystemRoles.ADMIN;
 
-const handleKeyDown = (event: React.KeyboardEvent) => {
-  const tabs: SettingsTabValues[] = [
-    SettingsTabValues.GENERAL,
-    SettingsTabValues.CHAT,
-    SettingsTabValues.COMMANDS,
-    SettingsTabValues.SPEECH,
-    ...(hasAnyPersonalizationFeature ? [SettingsTabValues.PERSONALIZATION] : []),
-    SettingsTabValues.DATA,
-    ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
-    SettingsTabValues.ACCOUNT,
-    'referral' as any,
-    'admin' as any, // Temporarily add admin tab
-  ];
-    const currentIndex = tabs.indexOf(activeTab);
+  const availableTabs = useMemo(() => {
+    const baseTabs: (SettingsTabValues | 'referral' | 'admin')[] = [
+      SettingsTabValues.GENERAL,
+      SettingsTabValues.CHAT,
+      SettingsTabValues.COMMANDS,
+      SettingsTabValues.SPEECH,
+      ...(hasAnyPersonalizationFeature ? [SettingsTabValues.PERSONALIZATION] : []),
+      SettingsTabValues.DATA,
+      ...(startupConfig?.balance?.enabled ? [SettingsTabValues.BALANCE] : []),
+      SettingsTabValues.ACCOUNT,
+      'referral',
+    ];
+
+    if (isAdminUser) {
+      baseTabs.push('admin');
+    }
+
+    return baseTabs;
+  }, [
+    hasAnyPersonalizationFeature,
+    startupConfig?.balance?.enabled,
+    isAdminUser,
+  ]);
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    const tabs = availableTabs;
+    const currentIndex = tabs.indexOf(activeTab as SettingsTabValues | 'referral' | 'admin');
 
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        setActiveTab(tabs[(currentIndex + 1) % tabs.length]);
+        setActiveTab(tabs[(currentIndex + 1) % tabs.length] as SettingsTabValues);
         break;
       case 'ArrowUp':
         event.preventDefault();
-        setActiveTab(tabs[(currentIndex - 1 + tabs.length) % tabs.length]);
+        setActiveTab(tabs[(currentIndex - 1 + tabs.length) % tabs.length] as SettingsTabValues);
         break;
       case 'Home':
         event.preventDefault();
-        setActiveTab(tabs[0]);
+        setActiveTab(tabs[0] as SettingsTabValues);
         break;
       case 'End':
         event.preventDefault();
-        setActiveTab(tabs[tabs.length - 1]);
+        setActiveTab(tabs[tabs.length - 1] as SettingsTabValues);
         break;
     }
   };
@@ -128,13 +143,19 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
     {
       value: 'referral' as any,
       icon: <Users size={18} />,
-      label: 'Indicações' as TranslationKeys,
+      label: 'Indicacoes' as TranslationKeys,
     },
-    {
-      value: 'admin' as any,
-      icon: null, // No icon for admin
-      label: 'Admin' as TranslationKeys,
-    },
+    ...(
+      isAdminUser
+        ? ([
+            {
+              value: 'admin' as any,
+              icon: <></>,
+              label: 'Admin' as TranslationKeys,
+            },
+          ] as { value: SettingsTabValues; icon: React.JSX.Element; label: TranslationKeys }[])
+        : []
+    ),
   ];
 
   const handleTabChange = (value: string) => {
@@ -231,9 +252,6 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
                         ref={(el) => (tabRefs.current[value] = el)}
                       >
                         {icon}
-                        {value === 'admin' && !isSmallScreen ? (
-                          <span className="text-gray-700">🛡️ </span>
-                        ) : null}
                         {localize(label)}
                       </Tabs.Trigger>
                     ))}
@@ -273,9 +291,11 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
                     <Tabs.Content value="referral">
                       <Referral />
                     </Tabs.Content>
-                    <Tabs.Content value="admin">
-                      <Admin onClose={() => onOpenChange(false)} />
-                    </Tabs.Content>
+                    {isAdminUser && (
+                      <Tabs.Content value="admin">
+                        <Admin onClose={() => onOpenChange(false)} />
+                      </Tabs.Content>
+                    )}
                   </div>
                 </Tabs.Root>
               </div>
@@ -286,3 +306,4 @@ const handleKeyDown = (event: React.KeyboardEvent) => {
     </Transition>
   );
 }
+
