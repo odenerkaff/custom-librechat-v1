@@ -185,27 +185,29 @@ O dashboard usa um sistema de grid responsivo:
 
 ## 🎯 Métricas Incluídas
 
-### Aquisição
+### 📈 Aquisição
 - Novos usuários diários/mensais
 - CAC (Customer Acquisition Cost)
 - Taxa de conversão free→pago
-- Distribuição por canal
+- Distribuição por canal (gráfico pizza)
 
-### Engajamento
+### 👥 Engajamento
 - Métricas de usuários ativos (DAU/MAU)
-- Tempo médio de sessão
-- Funcionalidades mais populares
+- Tempo médio de sessão (gráfico barras)
+- Funcionalidades mais populares (tabela)
 - Satisfação do usuário (NPS)
 
-### Financeiro
-- Receitas recorrentes (MRR/ARR)
-- Receita por usuário (ARPU)
-- Valor do cliente (LTV)
-- Margem de lucro
+### 💰 Financeiro
+- **MRR** (verde escuro) - Receita mensal recorrente
+- **ARR** (verde claro) - Receita anual recorrente
+- **LTV** - Lifetime Value
+- **ARPU** - Receita por usuário
+- **Margem Bruta** - Margem de lucro
+- **Churn Rate** (vermelho) - Taxa de cancelamento
 
-### Retenção
-- Taxa de churn
-- Perda de receita por churn
+### 🔄 Retenção
+- **Churn Rate** (vermelho) - Taxa de cancelamento mensal
+- **Revenue Churn** - Perda de receita (gráfico linha)
 
 ## 🚀 Próximos Passos
 
