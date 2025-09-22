@@ -432,38 +432,23 @@ const FinancialMetrics = () => (
 
 const RetentionMetrics = () => (
   <div className="space-y-6">
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="border-red-200 bg-red-50">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-red-800">Churn Rate</CardTitle>
-          <TrendingDown className="h-4 w-4 text-red-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-3xl font-bold text-red-800">{formatPercent(mockData.retention.churnRate)}</div>
-          <p className="text-xs text-red-600">
-            Taxa de cancelamento mensal
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Revenue Churn</CardTitle>
-          <CardDescription>Perda de receita por churn nos últimos 6 meses</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={mockData.retention.revenueChurn}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis tickFormatter={(value) => `${value}%`} />
-              <Tooltip formatter={(value) => [`${value}%`, 'Churn']} />
-              <Line type="monotone" dataKey="churn" stroke="#EF4444" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Revenue Churn</CardTitle>
+        <CardDescription>Perda de receita por churn nos últimos 6 meses</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={mockData.retention.revenueChurn}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis tickFormatter={(value) => `${value}%`} />
+            <Tooltip formatter={(value) => [`${value}%`, 'Churn']} />
+            <Line type="monotone" dataKey="churn" stroke="#EF4444" strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   </div>
 );
 
@@ -519,10 +504,10 @@ const Dashboard = () => {
       </div>
 
       {/* Dashboard Sections */}
-      <AcquisitionMetrics />
-      <EngagementMetrics />
       <FinancialMetrics />
       <RetentionMetrics />
+      <AcquisitionMetrics />
+      <EngagementMetrics />
     </div>
   );
 };
