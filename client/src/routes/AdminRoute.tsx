@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthContext } from '~/hooks/AuthContext';
 import AdminPanel from '../components/Admin/Panel';
+import Dashboard from '../components/Dashboard';
 import { FileMapContext, SetConvoProvider } from '~/Providers';
 import { useFileMap } from '~/hooks';
 
@@ -179,7 +180,7 @@ export default function AdminRoute() {
     const renderAdminContent = () => {
       switch (activeTab) {
         case 'dashboard':
-          return <AdminPanel showStats={true} showTable={false} />;
+          return <Dashboard />;
         case 'users':
           return <AdminPanel showStats={false} showTable={true} />;
         case 'logs':
@@ -192,7 +193,7 @@ export default function AdminRoute() {
             </div>
           );
         default:
-          return <AdminPanel showStats={true} showTable={false} />;
+          return <Dashboard />;
       }
     };
 

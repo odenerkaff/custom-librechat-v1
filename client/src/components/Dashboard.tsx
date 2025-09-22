@@ -1,4 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 import {
   Card,
   CardContent,
@@ -165,27 +180,15 @@ const AcquisitionMetrics = () => (
           <CardDescription>Usuários novos por dia nos últimos 7 dias</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockData.acquisition.newUsers.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">
-                  {new Date(item.date).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })}
-                </span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${(item.daily / 70) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium w-8 text-right">{item.daily}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 text-xs text-gray-500 text-center">
-            📊 Instale recharts para gráficos interativos
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={mockData.acquisition.newUsers}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" tickFormatter={(value) => new Date(value).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} />
+              <YAxis />
+              <Tooltip labelFormatter={(value) => new Date(value).toLocaleDateString('pt-BR')} />
+              <Line type="monotone" dataKey="daily" stroke="#3B82F6" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
@@ -195,31 +198,25 @@ const AcquisitionMetrics = () => (
           <CardDescription>Distribuição por canal de aquisição</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {mockData.acquisition.userSources.map((source, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: source.color }}
-                  ></div>
-                  <span className="text-sm font-medium">{source.name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="h-2 rounded-full"
-                      style={{ width: `${source.value}%`, backgroundColor: source.color }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium w-8 text-right">{source.value}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 text-xs text-gray-500 text-center">
-            🥧 Instale recharts para gráficos de pizza
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={mockData.acquisition.userSources}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {mockData.acquisition.userSources.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
@@ -288,25 +285,15 @@ const EngagementMetrics = () => (
           <CardDescription>Minutos por sessão nos últimos 7 dias</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockData.engagement.sessionTime.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{item.day}</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full"
-                      style={{ width: `${(item.time / 35) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium w-8 text-right">{item.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 text-xs text-gray-500 text-center">
-            📊 Instale recharts para gráficos de barras
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={mockData.engagement.sessionTime}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="time" fill="#10B981" />
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
 
@@ -468,25 +455,15 @@ const RetentionMetrics = () => (
           <CardDescription>Perda de receita por churn nos últimos 6 meses</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {mockData.retention.revenueChurn.map((item, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{item.month}</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-red-600 h-2 rounded-full"
-                      style={{ width: `${(item.churn / 5) * 100}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-sm font-medium w-8 text-right">{item.churn}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 text-xs text-gray-500 text-center">
-            📈 Instale recharts para gráficos de linha
-          </div>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={mockData.retention.revenueChurn}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={(value) => `${value}%`} />
+              <Tooltip formatter={(value) => [`${value}%`, 'Churn']} />
+              <Line type="monotone" dataKey="churn" stroke="#EF4444" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
     </div>
@@ -494,27 +471,61 @@ const RetentionMetrics = () => (
 );
 
 const Dashboard = () => {
+  const [selectedPeriod, setSelectedPeriod] = useState('7d');
+  const [lastUpdate, setLastUpdate] = useState(new Date());
+
+  const handleRefresh = () => {
+    setLastUpdate(new Date());
+    // Aqui você pode adicionar lógica para recarregar dados da API
+    window.location.reload();
+  };
+
+  const periodOptions = [
+    { value: '1d', label: 'Ontem' },
+    { value: '7d', label: 'Últimos 7 dias' },
+    { value: '30d', label: 'Últimos 30 dias' },
+    { value: '90d', label: 'Últimos 90 dias' },
+    { value: 'custom', label: 'Julho - Outubro' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard SaaS</h1>
-            <p className="text-gray-600 mt-1">Visão geral dos indicadores de performance</p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Clock className="h-4 w-4" />
-            Última atualização: {new Date().toLocaleString('pt-BR')}
-          </div>
+    <div className="p-6 space-y-6">
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <select
+            value={selectedPeriod}
+            onChange={(e) => setSelectedPeriod(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {periodOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Dashboard Sections */}
-        <AcquisitionMetrics />
-        <EngagementMetrics />
-        <FinancialMetrics />
-        <RetentionMetrics />
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock className="h-4 w-4" />
+            Última atualização: {lastUpdate.toLocaleString('pt-BR')}
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </button>
+        </div>
       </div>
+
+      {/* Dashboard Sections */}
+      <AcquisitionMetrics />
+      <EngagementMetrics />
+      <FinancialMetrics />
+      <RetentionMetrics />
     </div>
   );
 };
