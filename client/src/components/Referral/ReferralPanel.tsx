@@ -43,8 +43,8 @@ const ReferralPanel = () => {
   }
 
   if (error) {
-    return (
-      <div className="flex-1 p-6 max-w-6xl mx-auto">
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
         <div className="text-center py-8">
           <div className="text-red-600 mb-4">
             <svg className="w-16 h-16 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
@@ -65,7 +65,7 @@ const ReferralPanel = () => {
   const currentUserPosition = leaderboard.findIndex(item => item.name === referralData?.user.name);
 
   return (
-    <div className="flex-1 p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Programa de Indicação</h1>
@@ -185,7 +185,7 @@ const ReferralPanel = () => {
         </div>
 
         {/* Tab Content */}
-        <div className="p-6 min-h-[400px]">
+        <div className="p-6">
           {activeTab === 'overview' && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Como Funciona</h2>
@@ -340,4 +340,3 @@ const ReferralPanel = () => {
 };
 
 export default ReferralPanel;
-

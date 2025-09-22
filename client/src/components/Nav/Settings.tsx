@@ -187,7 +187,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             <DialogPanel
               className={cn(
-                'min-h-[600px] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:min-h-[373px] md:w-[950px]',
+                'min-h-[600px] max-h-[90vh] overflow-auto rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:min-h-[373px] md:w-[950px]',
               )}
             >
               <DialogTitle
@@ -220,7 +220,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                   <span className="sr-only">{localize('com_ui_close')}</span>
                 </button>
               </DialogTitle>
-          <div className="max-h-[750px] overflow-auto px-6 md:max-h-[600px] md:min-h-[600px] md:w-[900px]">
+          <div className="px-6 md:w-[900px]">
                 <Tabs.Root
                   value={activeTab}
                   onValueChange={handleTabChange}
@@ -246,7 +246,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                             ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary radix-state-active:bg-surface-hover radix-state-active:text-text-primary'
                             : 'bg-transparent text-text-secondary radix-state-active:bg-surface-tertiary radix-state-active:text-text-primary',
                           // Special styling for admin tab without icon - keep black text
-                          value === 'admin' ? 'font-semibold' : ''
+                          String(value) === 'admin' ? 'font-semibold' : ''
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}
@@ -256,7 +256,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                       </Tabs.Trigger>
                     ))}
                   </Tabs.List>
-                  <div className="overflow-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5">
+                  <div className="overflow-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5 min-h-[500px]">
                     <Tabs.Content value={SettingsTabValues.GENERAL}>
                       <General />
                     </Tabs.Content>
@@ -306,4 +306,3 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
     </Transition>
   );
 }
-

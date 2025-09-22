@@ -120,7 +120,7 @@ export default function Admin({ onClose }) {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-4 p-4 max-w-6xl mx-auto">
       <div className="border-b border-border-light pb-4">
         <h1 className="text-2xl font-bold">Painel de Administração</h1>
         <p className="text-base text-text-secondary mt-1">
