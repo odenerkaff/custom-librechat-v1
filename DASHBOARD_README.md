@@ -75,13 +75,15 @@ client/src/components/
 
 ## 🎯 Como Usar
 
-### Integrado no Admin Panel
+### Integrado no Painel Admin
 
-O dashboard está integrado na aba **"Admin"** do modal de configurações. Para acessá-lo:
+O dashboard está integrado na aba **"Dashboard"** do painel de administração. Para acessá-lo:
 
-1. Abra o modal de configurações (ícone de engrenagem)
-2. Clique na aba **"Admin"**
-3. Role para baixo até a seção **"Dashboard de Métricas"**
+1. Faça login como administrador
+2. Vá para **Configurações > Admin > Acessar Gerenciamento Completo**
+3. No painel admin, clique na aba **"📊 Dashboard"**
+4. Use o **seletor de período** para filtrar dados
+5. Clique em **"Atualizar"** para recarregar dados em tempo real
 
 ### Uso Independente
 
