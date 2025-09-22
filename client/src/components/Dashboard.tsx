@@ -127,10 +127,6 @@ const formatPercent = (value: number) => {
 // Component sections
 const AcquisitionMetrics = () => (
   <div className="space-y-6">
-    <div className="flex items-center gap-2">
-      <TrendingUp className="h-5 w-5 text-blue-600" />
-      <h2 className="text-2xl font-bold text-gray-900">Indicadores de Aquisição</h2>
-    </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>
@@ -225,10 +221,6 @@ const AcquisitionMetrics = () => (
 
 const EngagementMetrics = () => (
   <div className="space-y-6">
-    <div className="flex items-center gap-2">
-      <Activity className="h-5 w-5 text-green-600" />
-      <h2 className="text-2xl font-bold text-gray-900">Indicadores de Engajamento</h2>
-    </div>
 
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Card>
@@ -354,47 +346,17 @@ const EngagementMetrics = () => (
 
 const FinancialMetrics = () => (
   <div className="space-y-6">
-    <div className="flex items-center gap-2">
-      <DollarSign className="h-5 w-5 text-yellow-600" />
-      <h2 className="text-2xl font-bold text-gray-900">Indicadores Financeiros</h2>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Card className="md:col-span-2">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Primeira linha: MRR, LTV, ARPU */}
+      <Card className="bg-green-50 border-green-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">MRR (Monthly Recurring Revenue)</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <TrendingUp className="h-4 w-4 text-green-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{formatCurrency(mockData.financial.mrr)}</div>
-          <p className="text-xs text-muted-foreground">
+          <div className="text-3xl font-bold text-green-800">{formatCurrency(mockData.financial.mrr)}</div>
+          <p className="text-xs text-green-600">
             +15% em relação ao mês passado
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">ARR</CardTitle>
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.arr)}</div>
-          <p className="text-xs text-muted-foreground">
-            Receita anual recorrente
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">ARPU</CardTitle>
-          <DollarSign className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.arpu)}</div>
-          <p className="text-xs text-muted-foreground">
-            Receita por usuário
           </p>
         </CardContent>
       </Card>
@@ -405,9 +367,36 @@ const FinancialMetrics = () => (
           <Target className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.ltv)}</div>
+          <div className="text-3xl font-bold">{formatCurrency(mockData.financial.ltv)}</div>
           <p className="text-xs text-muted-foreground">
             Lifetime Value
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">ARPU</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">{formatCurrency(mockData.financial.arpu)}</div>
+          <p className="text-xs text-muted-foreground">
+            Receita por usuário
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Segunda linha: ARR, Margem Bruta, Churn Rate */}
+      <Card className="bg-green-100 border-green-300">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">ARR</CardTitle>
+          <TrendingUp className="h-4 w-4 text-green-700" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold text-green-900">{formatCurrency(mockData.financial.arr)}</div>
+          <p className="text-xs text-green-700">
+            Receita anual recorrente
           </p>
         </CardContent>
       </Card>
@@ -418,9 +407,22 @@ const FinancialMetrics = () => (
           <BarChart3 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{formatPercent(mockData.financial.grossMargin)}</div>
+          <div className="text-3xl font-bold">{formatPercent(mockData.financial.grossMargin)}</div>
           <p className="text-xs text-muted-foreground">
             Margem de lucro
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-red-800">Churn Rate</CardTitle>
+          <TrendingDown className="h-4 w-4 text-red-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold text-red-800">{formatPercent(mockData.retention.churnRate)}</div>
+          <p className="text-xs text-red-600">
+            Taxa de cancelamento mensal
           </p>
         </CardContent>
       </Card>
@@ -430,12 +432,7 @@ const FinancialMetrics = () => (
 
 const RetentionMetrics = () => (
   <div className="space-y-6">
-    <div className="flex items-center gap-2">
-      <RefreshCw className="h-5 w-5 text-purple-600" />
-      <h2 className="text-2xl font-bold text-gray-900">Retenção & Churn</h2>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="border-red-200 bg-red-50">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-red-800">Churn Rate</CardTitle>
@@ -455,7 +452,7 @@ const RetentionMetrics = () => (
           <CardDescription>Perda de receita por churn nos últimos 6 meses</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={300}>
             <LineChart data={mockData.retention.revenueChurn}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
@@ -481,11 +478,11 @@ const Dashboard = () => {
   };
 
   const periodOptions = [
-    { value: '1d', label: 'Ontem' },
     { value: '7d', label: 'Últimos 7 dias' },
     { value: '30d', label: 'Últimos 30 dias' },
     { value: '90d', label: 'Últimos 90 dias' },
-    { value: 'custom', label: 'Julho - Outubro' },
+    { value: '12m', label: 'Últimos 12 meses' },
+    { value: 'custom', label: 'Personalizado' },
   ];
 
   return (
