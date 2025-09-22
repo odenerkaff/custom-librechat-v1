@@ -1,6 +1,7 @@
 import { Fragment, useState, useEffect } from 'react';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Dashboard from '~/components/Dashboard';
 
 // Define User interface for proper typing
 interface User {
@@ -183,31 +184,14 @@ export default function Admin({ onClose }) {
         </div>
 
         <div className="bg-white rounded-lg p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-3">Configurações do Sistema</h2>
-          <p className="text-base text-gray-600">
-            Acesse recursos avançados de administração do sistema.
+          <h2 className="text-lg font-semibold mb-3">Dashboard de Métricas</h2>
+          <p className="text-base text-gray-600 mb-6">
+            Visualize indicadores completos de performance da plataforma SaaS.
           </p>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg">
-              <h3 className="text-base font-semibold mb-2">Logs do Sistema</h3>
-              <p className="text-base text-gray-600">Visualize logs de atividades e erros</p>
-              <button
-                onClick={handleGoToLogs}
-                className="mt-2 text-blue-600 hover:underline text-base"
-              >
-                Verificar Logs
-              </button>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h3 className="text-base font-semibold mb-2">Estatísticas</h3>
-              <p className="text-base text-gray-600">Analise estatísticas de uso do sistema</p>
-              <button
-                onClick={handleGoToDashboard}
-                className="mt-2 text-blue-600 hover:underline text-base"
-              >
-                Ver Estatísticas
-              </button>
-            </div>
+
+          {/* Dashboard integrado */}
+          <div className="border-t pt-6">
+            <Dashboard />
           </div>
         </div>
       </div>
