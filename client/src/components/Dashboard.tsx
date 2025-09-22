@@ -1,0 +1,522 @@
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '~/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '~/components/ui/table';
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Clock,
+  Star,
+  Target,
+  PieChart as PieChartIcon,
+  BarChart3,
+  Calendar,
+  UserPlus,
+  RefreshCw
+} from 'lucide-react';
+
+// Mock data - ready for backend integration
+const mockData = {
+  acquisition: {
+    newUsers: [
+      { date: '2024-01-01', daily: 45, monthly: 1200 },
+      { date: '2024-01-02', daily: 52, monthly: 1250 },
+      { date: '2024-01-03', daily: 38, monthly: 1280 },
+      { date: '2024-01-04', daily: 61, monthly: 1320 },
+      { date: '2024-01-05', daily: 49, monthly: 1360 },
+      { date: '2024-01-06', daily: 55, monthly: 1400 },
+      { date: '2024-01-07', daily: 67, monthly: 1450 },
+    ],
+    cac: 45.50,
+    conversionRate: 3.2,
+    userSources: [
+      { name: 'Orgânico', value: 65, color: '#10B981' },
+      { name: 'Pago', value: 25, color: '#3B82F6' },
+      { name: 'Referral', value: 10, color: '#F59E0B' },
+    ]
+  },
+  engagement: {
+    totalUsers: 15420,
+    dau: 3240,
+    mau: 8920,
+    dauMauRatio: 0.36,
+    sessionTime: [
+      { day: 'Seg', time: 24 },
+      { day: 'Ter', time: 28 },
+      { day: 'Qua', time: 22 },
+      { day: 'Qui', time: 31 },
+      { day: 'Sex', time: 26 },
+      { day: 'Sáb', time: 19 },
+      { day: 'Dom', time: 16 },
+    ],
+    topFeatures: [
+      { feature: 'Chat AI', usage: 8920, percentage: 85 },
+      { feature: 'Geração de Imagens', usage: 6540, percentage: 62 },
+      { feature: 'Análise de Dados', usage: 4230, percentage: 40 },
+      { feature: 'Tradução', usage: 3120, percentage: 30 },
+      { feature: 'Resumos', usage: 2890, percentage: 27 },
+    ],
+    nps: 72
+  },
+  financial: {
+    mrr: 45680,
+    arr: 548160,
+    arpu: 29.50,
+    ltv: 142.30,
+    grossMargin: 78.5
+  },
+  retention: {
+    churnRate: 2.8,
+    revenueChurn: [
+      { month: 'Jan', churn: 2.1 },
+      { month: 'Fev', churn: 2.8 },
+      { month: 'Mar', churn: 1.9 },
+      { month: 'Abr', churn: 3.2 },
+      { month: 'Mai', churn: 2.5 },
+      { month: 'Jun', churn: 2.8 },
+    ]
+  }
+};
+
+// Utility functions
+const formatCurrency = (value: number) => {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value);
+};
+
+const formatNumber = (value: number) => {
+  return new Intl.NumberFormat('pt-BR').format(value);
+};
+
+const formatPercent = (value: number) => {
+  return `${value.toFixed(1)}%`;
+};
+
+// Component sections
+const AcquisitionMetrics = () => (
+  <div className="space-y-6">
+    <div className="flex items-center gap-2">
+      <TrendingUp className="h-5 w-5 text-blue-600" />
+      <h2 className="text-2xl font-bold text-gray-900">Indicadores de Aquisição</h2>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Novos Usuários (Hoje)</CardTitle>
+          <UserPlus className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(mockData.acquisition.newUsers[mockData.acquisition.newUsers.length - 1].daily)}</div>
+          <p className="text-xs text-muted-foreground">
+            +12% em relação a ontem
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">CAC</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(mockData.acquisition.cac)}</div>
+          <p className="text-xs text-muted-foreground">
+            -5% em relação ao mês passado
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Taxa de Conversão</CardTitle>
+          <Target className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatPercent(mockData.acquisition.conversionRate)}</div>
+          <p className="text-xs text-muted-foreground">
+            Free → Pago
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Novos Usuários - Tendência</CardTitle>
+          <CardDescription>Usuários novos por dia nos últimos 7 dias</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {mockData.acquisition.newUsers.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  {new Date(item.date).toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit' })}
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${(item.daily / 70) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium w-8 text-right">{item.daily}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-xs text-gray-500 text-center">
+            📊 Instale recharts para gráficos interativos
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Origem dos Usuários</CardTitle>
+          <CardDescription>Distribuição por canal de aquisição</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {mockData.acquisition.userSources.map((source, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: source.color }}
+                  ></div>
+                  <span className="text-sm font-medium">{source.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="h-2 rounded-full"
+                      style={{ width: `${source.value}%`, backgroundColor: source.color }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium w-8 text-right">{source.value}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-xs text-gray-500 text-center">
+            🥧 Instale recharts para gráficos de pizza
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+);
+
+const EngagementMetrics = () => (
+  <div className="space-y-6">
+    <div className="flex items-center gap-2">
+      <Activity className="h-5 w-5 text-green-600" />
+      <h2 className="text-2xl font-bold text-gray-900">Indicadores de Engajamento</h2>
+    </div>
+
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Usuários Totais</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(mockData.engagement.totalUsers)}</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">DAU</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(mockData.engagement.dau)}</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">MAU</CardTitle>
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatNumber(mockData.engagement.mau)}</div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">DAU/MAU Ratio</CardTitle>
+          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{mockData.engagement.dauMauRatio.toFixed(2)}</div>
+          <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full"
+              style={{ width: `${mockData.engagement.dauMauRatio * 100}%` }}
+            ></div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Tempo Médio de Sessão</CardTitle>
+          <CardDescription>Minutos por sessão nos últimos 7 dias</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {mockData.engagement.sessionTime.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.day}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${(item.time / 35) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium w-8 text-right">{item.time}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-xs text-gray-500 text-center">
+            📊 Instale recharts para gráficos de barras
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>NPS (Net Promoter Score)</CardTitle>
+          <CardDescription>Satisfação dos usuários</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center h-64">
+          <div className={`text-6xl font-bold mb-4 ${
+            mockData.engagement.nps >= 70 ? 'text-green-600' :
+            mockData.engagement.nps >= 30 ? 'text-yellow-600' : 'text-red-600'
+          }`}>
+            {mockData.engagement.nps}
+          </div>
+          <div className="flex items-center gap-2">
+            <Star className={`h-5 w-5 ${
+              mockData.engagement.nps >= 70 ? 'text-green-600' :
+              mockData.engagement.nps >= 30 ? 'text-yellow-600' : 'text-red-600'
+            }`} />
+            <span className="text-sm text-muted-foreground">
+              {mockData.engagement.nps >= 70 ? 'Excelente' :
+               mockData.engagement.nps >= 30 ? 'Bom' : 'Precisa Melhorar'}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <Card>
+      <CardHeader>
+        <CardTitle>Funcionalidades Mais Utilizadas</CardTitle>
+        <CardDescription>Top 5 funcionalidades por uso</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Funcionalidade</TableHead>
+              <TableHead className="text-right">Usuários</TableHead>
+              <TableHead className="text-right">%</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {mockData.engagement.topFeatures.map((feature, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-medium">{feature.feature}</TableCell>
+                <TableCell className="text-right">{formatNumber(feature.usage)}</TableCell>
+                <TableCell className="text-right">{feature.percentage}%</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  </div>
+);
+
+const FinancialMetrics = () => (
+  <div className="space-y-6">
+    <div className="flex items-center gap-2">
+      <DollarSign className="h-5 w-5 text-yellow-600" />
+      <h2 className="text-2xl font-bold text-gray-900">Indicadores Financeiros</h2>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card className="md:col-span-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">MRR (Monthly Recurring Revenue)</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold">{formatCurrency(mockData.financial.mrr)}</div>
+          <p className="text-xs text-muted-foreground">
+            +15% em relação ao mês passado
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">ARR</CardTitle>
+          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.arr)}</div>
+          <p className="text-xs text-muted-foreground">
+            Receita anual recorrente
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">ARPU</CardTitle>
+          <DollarSign className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.arpu)}</div>
+          <p className="text-xs text-muted-foreground">
+            Receita por usuário
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">LTV</CardTitle>
+          <Target className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatCurrency(mockData.financial.ltv)}</div>
+          <p className="text-xs text-muted-foreground">
+            Lifetime Value
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Margem Bruta</CardTitle>
+          <BarChart3 className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{formatPercent(mockData.financial.grossMargin)}</div>
+          <p className="text-xs text-muted-foreground">
+            Margem de lucro
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+);
+
+const RetentionMetrics = () => (
+  <div className="space-y-6">
+    <div className="flex items-center gap-2">
+      <RefreshCw className="h-5 w-5 text-purple-600" />
+      <h2 className="text-2xl font-bold text-gray-900">Retenção & Churn</h2>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-red-800">Churn Rate</CardTitle>
+          <TrendingDown className="h-4 w-4 text-red-600" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold text-red-800">{formatPercent(mockData.retention.churnRate)}</div>
+          <p className="text-xs text-red-600">
+            Taxa de cancelamento mensal
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenue Churn</CardTitle>
+          <CardDescription>Perda de receita por churn nos últimos 6 meses</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {mockData.retention.revenueChurn.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">{item.month}</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-red-600 h-2 rounded-full"
+                      style={{ width: `${(item.churn / 5) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium w-8 text-right">{item.churn}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 text-xs text-gray-500 text-center">
+            📈 Instale recharts para gráficos de linha
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+);
+
+const Dashboard = () => {
+  return (
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard SaaS</h1>
+            <p className="text-gray-600 mt-1">Visão geral dos indicadores de performance</p>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock className="h-4 w-4" />
+            Última atualização: {new Date().toLocaleString('pt-BR')}
+          </div>
+        </div>
+
+        {/* Dashboard Sections */}
+        <AcquisitionMetrics />
+        <EngagementMetrics />
+        <FinancialMetrics />
+        <RetentionMetrics />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
